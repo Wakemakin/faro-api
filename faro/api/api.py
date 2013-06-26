@@ -1,11 +1,10 @@
-from flask import Blueprint, jsonify, abort
+import common as api
 
-api_endpoint = Blueprint('api_endpoint', __name__)
 
-@api_endpoint.route('/')
-def show():
-    endpoints = ["v1.0"]
-    try:
-        return jsonify(endpoints=endpoints)
-    except:
-        abort(404)
+class FaroEndpoint(api.ApiEndpoint):
+    def __init__(self, app, name, prefix=None):
+        super(FaroEndpoint, self).__init__(app, prefix=prefix, name=name)
+
+        @app.teardown_appcontext
+        def shutdown_session(exception=None):
+            app.db.remove()

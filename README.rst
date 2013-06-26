@@ -10,6 +10,12 @@ Alpha 2 is a raw flask RESTful api not using flask-restless. It aims to be more
 powerful and configurable than Alpha 1. It will be running on port 5002 on the
 same host and its availability is random at best, zero and worst.
 
+It has support for the following resources:
+
+* Users at /api/users
+* Events at /api/events
+* Choices at /api/choices
+
 Alpha 1
 =======
 
@@ -43,8 +49,8 @@ On a linux type machine with git perform the following steps::
 Just a summary of what is happening above:
 
 - The resty client is first cloned (downloaded) from github.com
-- By 'sourcing' the file it dumps the resty code into your shell, so you can use
-  the application
+- By 'sourcing' the file it dumps the resty code into your shell, so you can
+  use the application
 - resty <url> -H "..." will set the global resty URL target, and -H are headers
   passed to the underlying HTTP system, curl
 - At this point normal HTTP methods are available in all caps: GET, POST, etc
