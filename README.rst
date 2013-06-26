@@ -4,6 +4,12 @@ Project faro
 Project faro is a service that allows users to collaboratively plan events and then
 will handle the organization of participants during the lifetime of the event.
 
+Alpha 2
+=======
+Alpha 2 is a raw flask RESTful api not using flask-restless. It aims to be more
+powerful and configurable than Alpha 1. It will be running on port 5002 on the
+same host and its availability is random at best, zero and worst.
+
 Alpha 1
 =======
 
