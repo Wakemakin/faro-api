@@ -17,4 +17,4 @@ manager.create_api(db.User, methods=['GET', 'POST', 'DELETE'])
 manager.create_api(db.Event, methods=['GET', 'POST', 'DELETE'])
 manager.create_api(db.Choice, methods=['GET', 'POST', 'DELETE'])
 
-app.run(host='0.0.0.0')
+app.run(host='0.0.0.0', port=5001)
