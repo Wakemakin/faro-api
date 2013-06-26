@@ -34,6 +34,17 @@ On a linux type machine with git perform the following steps::
   $ POST /api/events -d '{"name":"<some event name>", "owner_id": "<user uuid>"}'
   $ DELETE /api/events/<some event uuid>
 
+Just a summary of what is happening above:
+
+- The resty client is first cloned (downloaded) from github.com
+- By 'sourcing' the file it dumps the resty code into your shell, so you can use
+  the application
+- resty <url> -H "..." will set the global resty URL target, and -H are headers
+  passed to the underlying HTTP system, curl
+- At this point normal HTTP methods are available in all caps: GET, POST, etc
+  at passed resource relative to the global resty URL target
+- Data is passed to curl using -d, and jibely.com is expecting json
+
 Service Features
 ================
 
