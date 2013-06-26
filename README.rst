@@ -45,6 +45,14 @@ Just a summary of what is happening above:
   at passed resource relative to the global resty URL target
 - Data is passed to curl using -d, and jibely.com is expecting json
 
+Expected and known issues:
+
+- There is no attempt to maintain foreign key (FK) constraints
+- Sometimes errors are not returned in a proper format (all of them should be
+  json)
+- The service is currently running on a tmux session and is subject to the
+  whims of the tmux owner
+
 Service Features
 ================
 
