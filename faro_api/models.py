@@ -11,6 +11,8 @@ class User(Model):
     __tablename__ = 'users'
     id = Column(Unicode, primary_key=True)
     username = Column(Unicode, unique=True)
+    first_name = Column(Unicode)
+    last_name = Column(Unicode)
 
     def __init__(self, username, **kwargs):
         super(User, self).__init__(**kwargs)
