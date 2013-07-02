@@ -3,7 +3,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy import Column, DateTime
 from faro_api import app
-
+from faro_api import utils
 from faro_api.exceptions import common as exc
 
 engine = create_engine(app.config['DATABASE_URI'],
@@ -16,6 +16,15 @@ db_session = scoped_session(sessionmaker(autocommit=False,
 
 def init_db():
     Model.metadata.create_all(bind=engine)
+
+
+def get_one(cls, filter_value, alternative_check=None):
+    if utils.is_uuid(filter_value):
+        return cls.query.filter(cls.id == filter_value).one()
+    elif alternative_check is not None:
+        alt_col = getattr(cls, alternative_check)
+        return cls.query.filter(alt_col == filter_value).one()
+    raise exc.NotFound()
 
 
 class Base(object):
@@ -50,5 +59,5 @@ Model = declarative_base(cls=Base)
 Model.query = db_session.query_property()
 
 from faro_api import models
-
+models
 #event.listen(db_session, 'after_flush', search.update_model_based_indexes)

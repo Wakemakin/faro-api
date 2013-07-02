@@ -19,6 +19,10 @@ class InvalidInput(FaroException):
     information = "Incorrect arguments or bad syntax"
 
 
+class RequiresBody(InvalidInput):
+    information = "Empty body"
+
+
 class Forbidden(FaroException):
     code = 403
     information = "Forbidden."

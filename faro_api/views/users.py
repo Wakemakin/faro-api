@@ -1,14 +1,9 @@
-import json
-
-from flask import Blueprint, request, jsonify, Response
-from flask.views import MethodView
+from flask import Blueprint
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm.exc import NoResultFound
 
 from faro_api import app
-from faro_api.database import db_session
+from faro_api.views.common import BaseApi
 from faro_api.models import User
-from faro_api.utils import is_uuid
 from faro_api.exceptions import common as exc
 
 
@@ -17,82 +12,31 @@ class UniqueUsernameRequired(exc.FaroException):
     information = "Username must be unique"
 
 
-class UserApi(MethodView):
-    def _make_user_dict(self, user):
-        return {"username": user.username,
-                "id": user.id}
+class UserApi(BaseApi):
+    def __init__(self):
+        super(UserApi, self).__init__()
+        self.base_resource = User
+        self.alternate_key = "username"
 
-    def get(self, user_id):
-        if user_id is None:
-            res = list()
-            users = User.query.all()
-            if users is not None:
-                for user in users:
-                    res.append(user.to_dict())
-            return jsonify(objects=res), 200, {}
-        try:
-            if is_uuid(user_id):
-                user = User.query.filter(User.id == user_id).one()
-            else:
-                user = User.query.filter(User.username == user_id).one()
-            return jsonify(objects=user.to_dict()), 200, {}
-        except NoResultFound:
-            raise exc.NotFound()
+    def get(self, id, **kwargs):
+        return super(UserApi, self).get(id, with_events=True)
 
-    def put(self, user_id):
-        data = json.loads(request.data)
-        try:
-            if is_uuid(user_id):
-                user = User.query.filter(User.id == user_id).one()
-            else:
-                user = User.query.filter(User.username == user_id).one()
-        except NoResultFound:
-            raise exc.NotFound()
-        user.update(**data)
-        db_session.commit()
-        return jsonify(user.to_dict()), 201, {}
+    def put(self, id):
+        return super(UserApi, self).put(id, with_events=True)
 
     def post(self):
-        data = json.loads(request.data)
         try:
-            user = User(**data)
-            db_session.add(user)
-            db_session.commit()
-            return jsonify(user.to_dict()), 201, {}
+            return super(UserApi, self).post(with_events=True)
         except IntegrityError as e:
             app.logger.error(e)
             raise UniqueUsernameRequired()
-        except TypeError as e:
-            app.logger.error(e)
-            db_session.rollback()
-            raise exc.InvalidInput
-        except Exception as e:
-            app.logger.error(e)
-            db_session.rollback()
-            raise exc.UnknownError()
-
-    def delete(self, user_id):
-        try:
-            if is_uuid(user_id):
-                user = User.query.filter(User.id == user_id).one()
-            else:
-                user = User.query.filter(User.username == user_id).one()
-            db_session.delete(user)
-            db_session.commit()
-            return Response(status=204)
-        except NoResultFound:
-            raise exc.NotFound()
-        except Exception as e:
-            app.logger.error(e)
-            db_session.rollback()
-            raise exc.UnknownError()
 
 
 mod = Blueprint('users', __name__, url_prefix='/api/users')
 
 user_view = UserApi().as_view('user_api')
-mod.add_url_rule('', defaults={'user_id': None},
+mod.add_url_rule('', defaults={'id': None},
                  view_func=user_view, methods=['GET'])
 mod.add_url_rule('', view_func=user_view, methods=['POST'])
-mod.add_url_rule('/<user_id>', view_func=user_view,
+mod.add_url_rule('/<id>', view_func=user_view,
                  methods=['GET', 'DELETE', 'PUT'])

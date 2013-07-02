@@ -1,73 +1,58 @@
-import json
-
-from flask import Blueprint, request, jsonify, Response
-from flask.views import MethodView
+from flask import Blueprint, request
 from sqlalchemy.orm.exc import NoResultFound
 
-from faro_api import app
-from faro_api.database import db_session
-from faro_api.models import Event
-from faro_api.utils import is_uuid
+from faro_api.views.common import BaseApi
+from faro_api.database import get_one
+from faro_api.models import Event, User
+from faro_api import utils
 from faro_api.exceptions import common as exc
 
 
-class EventApi(MethodView):
+class EventApi(BaseApi):
+    def __init__(self):
+        super(EventApi, self).__init__()
+        self.base_resource = Event
 
-    def get(self, event_id):
-        if event_id is None:
-            res = list()
-            events = Event.query.all()
-            if events is not None:
-                for event in events:
-                    res.append(event.to_dict())
-            return jsonify(objects=res), 200, {}
-        try:
-            if is_uuid(event_id):
-                event = Event.query.filter(Event.id == event_id).one()
-            else:
-                event = Event.query.filter(Event.name == event_id).one()
-            return jsonify(objects=event.to_dict()), 200, {}
-        except NoResultFound:
-            raise exc.NotFound()
+    def get(self, id):
+        return super(EventApi, self).get(id, with_owner=True)
+
+    def put(self, id):
+        data = utils.json_request_data(request.data)
+        with_owner = False
+        if 'owner_id' in data:
+            user_id = data['owner_id']
+            try:
+                user = get_one(User, user_id, "username")
+                data['owner_id'] = user.id
+                attachments = [{'owner': user}]
+                with_owner = True
+            except NoResultFound:
+                raise exc.NotFound(information="Owner not found")
+        return super(EventApi, self).put(id, with_owner=with_owner,
+                                         attachments=attachments)
 
     def post(self):
-        data = json.loads(request.data)
-        try:
-            event = Event(**data)
-            db_session.add(event)
-            db_session.commit()
-            return jsonify(objects=event.to_dict()), 201, {}
-        except TypeError as e:
-            app.logger.error(e)
-            db_session.rollback()
-            raise exc.InvalidInput
-        except Exception as e:
-            app.logger.error(e)
-            db_session.rollback()
-            raise exc.UnknownError()
-
-    def delete(self, event_id):
-        try:
-            if is_uuid(event_id):
-                event = Event.query.filter(Event.id == event_id).one()
-            else:
-                event = Event.query.filter(Event.name == event_id).one()
-            db_session.delete(event)
-            db_session.commit()
-            return Response(status=204)
-        except NoResultFound:
-            raise exc.NotFound()
-        except Exception as e:
-            app.logger.error(e)
-            db_session.rollback()
-            raise exc.UnknownError()
+        data = utils.json_request_data(request.data)
+        with_owner = False
+        attachments = None
+        if 'owner_id' in data:
+            user_id = data['owner_id']
+            try:
+                user = get_one(User, user_id, "username")
+                data['owner_id'] = user.id
+                attachments = {'owner': user}
+                with_owner = True
+            except NoResultFound:
+                raise exc.NotFound(information="Owner not found")
+        return super(EventApi, self).post(with_owner=with_owner,
+                                          attachments=attachments)
 
 
 mod = Blueprint('events', __name__, url_prefix='/api/events')
 
 event_view = EventApi().as_view('event_api')
-mod.add_url_rule('', defaults={'event_id': None},
+mod.add_url_rule('', defaults={'id': None},
                  view_func=event_view, methods=['GET'])
 mod.add_url_rule('', view_func=event_view, methods=['POST'])
-mod.add_url_rule('/<event_id>', view_func=event_view,
-                 methods=['GET', 'DELETE'])
+mod.add_url_rule('/<id>', view_func=event_view,
+                 methods=['GET', 'DELETE', 'PUT'])
