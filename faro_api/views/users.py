@@ -28,27 +28,44 @@ class UserApi(MethodView):
             users = User.query.all()
             if users is not None:
                 for user in users:
-                    res.append(self._make_user_dict(user))
+                    res.append(user.to_dict())
             return jsonify(objects=res), 200, {}
         try:
             if is_uuid(user_id):
                 user = User.query.filter(User.id == user_id).one()
             else:
                 user = User.query.filter(User.username == user_id).one()
-            return jsonify(objects=self._make_user_dict(user)), 200, {}
+            return jsonify(objects=user.to_dict()), 200, {}
         except NoResultFound:
             raise exc.NotFound()
+
+    def put(self, user_id):
+        data = json.loads(request.data)
+        try:
+            if is_uuid(user_id):
+                user = User.query.filter(User.id == user_id).one()
+            else:
+                user = User.query.filter(User.username == user_id).one()
+        except NoResultFound:
+            raise exc.NotFound()
+        user.update(**data)
+        db_session.commit()
+        return jsonify(user.to_dict()), 201, {}
 
     def post(self):
         data = json.loads(request.data)
         try:
-            user = User(data['username'])
+            user = User(**data)
             db_session.add(user)
             db_session.commit()
-            return jsonify(objects=self._make_user_dict(user)), 201, {}
+            return jsonify(user.to_dict()), 201, {}
         except IntegrityError as e:
             app.logger.error(e)
             raise UniqueUsernameRequired()
+        except TypeError as e:
+            app.logger.error(e)
+            db_session.rollback()
+            raise exc.InvalidInput
         except Exception as e:
             app.logger.error(e)
             db_session.rollback()
@@ -78,4 +95,4 @@ mod.add_url_rule('', defaults={'user_id': None},
                  view_func=user_view, methods=['GET'])
 mod.add_url_rule('', view_func=user_view, methods=['POST'])
 mod.add_url_rule('/<user_id>', view_func=user_view,
-                 methods=['GET', 'DELETE'])
+                 methods=['GET', 'DELETE', 'PUT'])

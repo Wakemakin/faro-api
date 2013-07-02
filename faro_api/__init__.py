@@ -13,7 +13,9 @@ def remove_db_session(exception):
 
 from faro_api.views import endpoint
 from faro_api.views import users
+from faro_api.views import events
 app.register_blueprint(endpoint.mod)
 app.register_blueprint(users.mod)
+app.register_blueprint(events.mod)
 
 from faro_api.database import db_session
