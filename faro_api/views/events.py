@@ -1,11 +1,16 @@
+import logging
+
 from flask import Blueprint, request
 from sqlalchemy.orm.exc import NoResultFound
 
 from faro_api.views.common import BaseApi
 from faro_api.database import get_one
-from faro_api.models import Event, User
+from faro_api.models.event import Event
+from faro_api.models.user import User
 from faro_api import utils
 from faro_api.exceptions import common as exc
+
+logger = logging.getLogger(__name__)
 
 
 class EventApi(BaseApi):

@@ -1,11 +1,14 @@
+import logging
+
 from flask import jsonify, Response, request
 from flask.views import MethodView
 from sqlalchemy.orm.exc import NoResultFound
 
-from faro_api import app
 from faro_api.exceptions import common as exc
 from faro_api.database import db_session, get_one
 from faro_api import utils
+
+logger = logging.getLogger(__name__)
 
 
 class BaseApi(MethodView):
@@ -42,7 +45,7 @@ class BaseApi(MethodView):
             db_session.commit()
             return jsonify(result.to_dict(**kwargs)), 201, {}
         except TypeError as e:
-            app.logger.error(e)
+            logger.error(e)
             db_session.rollback()
             raise exc.InvalidInput
 
@@ -66,6 +69,6 @@ class BaseApi(MethodView):
         except NoResultFound:
             raise exc.NotFound()
         except Exception as e:
-            app.logger.error(e)
+            logger.error(e)
             db_session.rollback()
             raise exc.UnknownError()

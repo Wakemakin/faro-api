@@ -1,10 +1,13 @@
+import logging
+
 from flask import Blueprint
 from sqlalchemy.exc import IntegrityError
 
-from faro_api import app
 from faro_api.views.common import BaseApi
-from faro_api.models import User
+from faro_api.models.user import User
 from faro_api.exceptions import common as exc
+
+logger = logging.getLogger(__name__)
 
 
 class UniqueUsernameRequired(exc.FaroException):
@@ -28,7 +31,7 @@ class UserApi(BaseApi):
         try:
             return super(UserApi, self).post(with_events=True)
         except IntegrityError as e:
-            app.logger.error(e)
+            logger.error(e)
             raise UniqueUsernameRequired()
 
 

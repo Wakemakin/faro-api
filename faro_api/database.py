@@ -1,21 +1,17 @@
-from sqlalchemy import create_engine, func
+from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy.ext.declarative import declarative_base, declared_attr
-from sqlalchemy import Column, DateTime
+from sqlalchemy.ext.declarative import declarative_base
 from faro_api import app
 from faro_api import utils
 from faro_api.exceptions import common as exc
+from faro_api.models.base_models import Base
 
-engine = create_engine(app.config['DATABASE_URI'],
-                       convert_unicode=True,
-                       **app.config['DATABASE_CONNECT_OPTIONS'])
+default_engine = create_engine(app.config['DATABASE_URI'],
+                               convert_unicode=True,
+                               **app.config['DATABASE_CONNECT_OPTIONS'])
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
-                                         bind=engine))
-
-
-def init_db():
-    Model.metadata.create_all(bind=engine)
+                                         bind=default_engine))
 
 
 def get_one(cls, filter_value, alternative_check=None):
@@ -27,37 +23,12 @@ def get_one(cls, filter_value, alternative_check=None):
     raise exc.NotFound()
 
 
-class Base(object):
-    _read_only_base = ['id', 'date_created']
-
-    @declared_attr
-    def __tablename__(cls):
-        return cls.__name__.lower() + "s"
-
-    date_created = Column(DateTime, default=func.now())
-
-    def __init__(self, **kwargs):
-        pass
-
-    def to_dict(self):
-        pass
-
-    def read_only_columns(self):
-        return []
-
-    def update(self, **kwargs):
-        for key, value in kwargs.iteritems():
-            if key in self._read_only_base or\
-                    key in self.read_only_columns():
-                raise exc.Forbidden(information="%s is read-only" % key)
-            if not hasattr(self, key):
-                raise exc.InvalidInput(information="%s is invalid" % key)
-            setattr(self, key, value)
-
-
 Model = declarative_base(cls=Base)
 Model.query = db_session.query_property()
 
-from faro_api import models
-models
-#event.listen(db_session, 'after_flush', search.update_model_based_indexes)
+
+def init_db(engine=None):
+    if engine is None:
+        engine = default_engine
+    from faro_api.models import user, event
+    Model.metadata.create_all(bind=engine)
