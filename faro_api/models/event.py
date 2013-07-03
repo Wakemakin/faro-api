@@ -1,11 +1,11 @@
 from sqlalchemy import Column, Boolean, Unicode, ForeignKey
 from sqlalchemy.orm import relationship, backref
 
-from faro_api.database import Model
+import faro_api.database as db
 from faro_api.utils import make_uuid
 
 
-class Event(Model):
+class Event(db.model()):
     id = Column(Unicode, primary_key=True)
     name = Column(Unicode)
     description = Column(Unicode, nullable=True)

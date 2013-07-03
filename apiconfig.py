@@ -2,8 +2,22 @@ import os
 
 _basedir = os.path.abspath(os.path.dirname(__file__))
 
-DEBUG = True
-DATABASE_URI = 'sqlite:///' + os.path.join(_basedir, 'faro-api.db')
-DATABASE_CONNECT_OPTIONS = {}
+DATABASE_FILE = 'faro.db'
 
-del os
+
+class Config(object):
+    DEBUG = False
+    TESTING = False
+    DATABASE_CONNECT_OPTIONS = {}
+
+
+class DevelopmentConfig(Config):
+    import os
+    _basedir = os.path.abspath(os.path.dirname(__file__))
+    DATABASE_URI = 'sqlite:///' + os.path.join(_basedir, DATABASE_FILE)
+    del os
+
+
+class TestConfig(Config):
+    DEBUG = True
+    TESTING = True

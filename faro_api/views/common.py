@@ -1,11 +1,11 @@
 import logging
 
-from flask import jsonify, Response, request
+from flask import jsonify, Response, request, g
 from flask.views import MethodView
 from sqlalchemy.orm.exc import NoResultFound
 
 from faro_api.exceptions import common as exc
-from faro_api.database import db_session, get_one
+from faro_api import database as db
 from faro_api import utils
 
 logger = logging.getLogger(__name__)
@@ -15,23 +15,30 @@ class BaseApi(MethodView):
     def __init__(self):
         self.base_resource = None
         self.alternate_key = None
+        self._configure_endpoint()
+
+    def _configure_endpoint(self):
+        pass
 
     def get(self, id, **kwargs):
+        session = g.session
         if id is None:
             res = list()
-            results = self.base_resource.query.all()
+            results = session.query(self.base_resource).all()
             if results is not None:
                 for result in results:
                     res.append(result.to_dict(**kwargs))
             return jsonify(objects=res), 200, {}
         try:
-            result = get_one(self.base_resource, id, self.alternate_key)
+            result = db.get_one(session, self.base_resource, id,
+                                self.alternate_key)
             return jsonify(objects=result.to_dict(**kwargs)), 200, {}
         except NoResultFound:
             raise exc.NotFound()
 
     @utils.require_body
     def post(self, **kwargs):
+        session = g.session
         data = utils.json_request_data(request.data)
         try:
             result = self.base_resource(**data)
@@ -41,34 +48,38 @@ class BaseApi(MethodView):
                     for attach, value in attachments.items():
                         setattr(result, attach, value)
                 kwargs.pop("attachments")
-            db_session.add(result)
-            db_session.commit()
+            session.add(result)
+            session.commit()
             return jsonify(result.to_dict(**kwargs)), 201, {}
         except TypeError as e:
             logger.error(e)
-            db_session.rollback()
+            session.rollback()
             raise exc.InvalidInput
 
     @utils.require_body
     def put(self, id, **kwargs):
+        session = g.session
         data = utils.json_request_data(request.data)
         try:
-            result = get_one(self.base_resource, id, self.alternate_key)
+            result = db.get_one(session, self.base_resource, id,
+                                self.alternate_key)
             result.update(**data)
-            db_session.commit()
-            return jsonify(result.to_dict(**kwargs)), 201, {}
+            session.commit()
+            return jsonify(result.to_dict(**kwargs)), 200, {}
         except NoResultFound:
             raise exc.NotFound()
 
     def delete(self, id):
+        session = g.session
         try:
-            result = get_one(self.base_resource, id, self.alternate_key)
-            db_session.delete(result)
-            db_session.commit()
+            result = db.get_one(session, self.base_resource, id,
+                                self.alternate_key)
+            session.delete(result)
+            session.commit()
             return Response(status=204)
         except NoResultFound:
             raise exc.NotFound()
         except Exception as e:
             logger.error(e)
-            db_session.rollback()
+            session.rollback()
             raise exc.UnknownError()

@@ -21,6 +21,17 @@ class UserApi(BaseApi):
         self.base_resource = User
         self.alternate_key = "username"
 
+    def _configure_endpoint(self):
+        mod = Blueprint('users', __name__, url_prefix='/api/users')
+
+        user_view = self.as_view('user_api')
+        mod.add_url_rule('', defaults={'id': None},
+                         view_func=user_view, methods=['GET'])
+        mod.add_url_rule('', view_func=user_view, methods=['POST'])
+        mod.add_url_rule('/<id>', view_func=user_view,
+                         methods=['GET', 'DELETE', 'PUT'])
+        self.blueprint = mod
+
     def get(self, id, **kwargs):
         return super(UserApi, self).get(id, with_events=True)
 
@@ -33,13 +44,3 @@ class UserApi(BaseApi):
         except IntegrityError as e:
             logger.error(e)
             raise UniqueUsernameRequired()
-
-
-mod = Blueprint('users', __name__, url_prefix='/api/users')
-
-user_view = UserApi().as_view('user_api')
-mod.add_url_rule('', defaults={'id': None},
-                 view_func=user_view, methods=['GET'])
-mod.add_url_rule('', view_func=user_view, methods=['POST'])
-mod.add_url_rule('/<id>', view_func=user_view,
-                 methods=['GET', 'DELETE', 'PUT'])

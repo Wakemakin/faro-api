@@ -9,6 +9,20 @@ from werkzeug.exceptions import HTTPException
 from faro_api.exceptions import common as exc
 
 
+def generate_temp_database():
+    import os
+    _basedir = os.path.abspath(os.path.dirname(__file__))
+    filename = str(uuid.uuid4()) + ".db"
+    return os.path.join(_basedir, filename)
+
+
+def static_var(varname, value):
+    def decorate(func):
+        setattr(func, varname, value)
+        return func
+    return decorate
+
+
 def require_body(func):
     def check_body_exists(*args, **kwargs):
         if len(request.data) == 0:

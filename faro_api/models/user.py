@@ -1,11 +1,10 @@
-from sqlalchemy import Column, Boolean, Unicode, ForeignKey
-from sqlalchemy.orm import relationship, backref
+from sqlalchemy import Column, Unicode
 
-from faro_api.database import Model
+import faro_api.database as db
 from faro_api.utils import make_uuid
 
 
-class User(Model):
+class User(db.model()):
     id = Column(Unicode, primary_key=True)
     username = Column(Unicode, unique=True)
     first_name = Column(Unicode)
