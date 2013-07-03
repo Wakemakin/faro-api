@@ -36,6 +36,7 @@ class EventApi(BaseApi):
         session = g.session
         data = utils.json_request_data(request.data)
         with_owner = False
+        attachments = None
         if 'owner_id' in data:
             user_id = data['owner_id']
             try:

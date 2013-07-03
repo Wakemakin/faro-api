@@ -53,26 +53,12 @@ class UserTest(unittest.TestCase):
         assert res['objects']['username'] == 'test'
         assert res['objects']['id'] == id
 
-    def test_get_one_user_by_fail_username(self):
-        rv = self.client.get('/api/users/asdfasdf')
-        assert rv.status_code == 404
-
-    def test_get_one_user_by_fail_id(self):
-        id = str(utils.make_uuid())
-        rv = self.client.get('/api/users/' + id)
-        assert rv.status_code == 404
-
     def test_get_multi_user(self):
         rv = self.create_user("test1")
         rv = self.create_user("test2")
         rv = self.client.get('/api/users')
         res = json.loads(rv.data)
         assert len(res['objects']) == 2
-
-    def test_post_dupe_username(self):
-        rv = self.create_user("test1")
-        rv = self.create_user("test1")
-        assert rv.status_code == 409
 
     def test_post_user_just_username(self):
         rv = self.client.post('/api/users', data=json.dumps(
@@ -106,36 +92,7 @@ class UserTest(unittest.TestCase):
                               {'username': 'test',
                               'id': 'test-id'}
                               ), follow_redirects=True)
-        res = json.loads(rv.data)
-        assert res['username'] == 'test'
-        assert res['id'] is not None
-        assert res['id'] != 'test-id'
-        assert utils.is_uuid(res['id'])
         assert rv.status_code == 201
-
-    def test_post_user_with_made_user(self):
-        rv = self.create_user("test1")
-        rv = self.client.post('/api/users/test1', data=json.dumps(
-                              {'id': 'test-id'}
-                              ), follow_redirects=True)
-        logger.debug(rv.status)
-        assert rv.status_code == 405
-
-    def test_put_user_with_id(self):
-        rv = self.create_user("test1")
-        rv = self.client.put('/api/users/test1', data=json.dumps(
-                             {'id': 'test-id'}
-                             ), follow_redirects=True)
-        logger.debug(rv.status)
-        assert rv.status_code == 403
-
-    def test_put_user_with_username(self):
-        rv = self.create_user("test1")
-        rv = self.client.put('/api/users/test1', data=json.dumps(
-                             {'username': 'test-id'}
-                             ), follow_redirects=True)
-        logger.debug(rv.status)
-        assert rv.status_code == 403
 
     def test_put_user_with_firstname(self):
         rv = self.create_user("test1")
@@ -173,6 +130,44 @@ class UserTest(unittest.TestCase):
         rv = self.client.delete('/api/users/test1', follow_redirects=True)
         assert rv.status_code == 204
 
-    def test_delete_fail_user(self):
+    def test_error_post_dupe_username(self):
+        rv = self.create_user("test1")
+        rv = self.create_user("test1")
+        assert rv.status_code == 409
+
+    def test_error_get_one_user_by_fail_username(self):
+        rv = self.client.get('/api/users/asdfasdf')
+        assert rv.status_code == 404
+
+    def test_error_get_one_user_by_fail_id(self):
+        id = str(utils.make_uuid())
+        rv = self.client.get('/api/users/' + id)
+        assert rv.status_code == 404
+
+    def test_error_post_user_with_made_user(self):
+        rv = self.create_user("test1")
+        rv = self.client.post('/api/users/test1', data=json.dumps(
+                              {'id': 'test-id'}
+                              ), follow_redirects=True)
+        logger.debug(rv.status)
+        assert rv.status_code == 405
+
+    def test_error_put_user_with_id(self):
+        rv = self.create_user("test1")
+        rv = self.client.put('/api/users/test1', data=json.dumps(
+                             {'id': 'test-id'}
+                             ), follow_redirects=True)
+        logger.debug(rv.status)
+        assert rv.status_code == 403
+
+    def test_error_put_user_with_username(self):
+        rv = self.create_user("test1")
+        rv = self.client.put('/api/users/test1', data=json.dumps(
+                             {'username': 'test-id'}
+                             ), follow_redirects=True)
+        logger.debug(rv.status)
+        assert rv.status_code == 403
+
+    def test_error_delete_fail_user(self):
         rv = self.client.delete('/api/users/asfdf', follow_redirects=True)
         assert rv.status_code == 404

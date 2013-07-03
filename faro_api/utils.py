@@ -43,6 +43,8 @@ def make_uuid():
 
 
 def is_uuid(uuid_str):
+    if isinstance(uuid_str, uuid.UUID):
+        uuid_str = str(uuid_str)
     if uuid_str is None or not isinstance(uuid_str, basestring):
         return False
     re_string = r"%s-%s-%s-%s-%s" % ("^[0-9a-f]{8}",

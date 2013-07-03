@@ -63,6 +63,12 @@ class BaseApi(MethodView):
         try:
             result = db.get_one(session, self.base_resource, id,
                                 self.alternate_key)
+            if "attachments" in kwargs:
+                attachments = kwargs["attachments"]
+                if attachments is not None:
+                    for attach, value in attachments.items():
+                        setattr(result, attach, value)
+                kwargs.pop("attachments")
             result.update(**data)
             session.commit()
             return jsonify(result.to_dict(**kwargs)), 200, {}
