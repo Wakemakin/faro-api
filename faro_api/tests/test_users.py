@@ -5,7 +5,7 @@ import json
 import faro_api
 from faro_api import utils
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("faro-api."+__name__)
 
 
 class UserTest(unittest.TestCase):
@@ -106,6 +106,79 @@ class UserTest(unittest.TestCase):
         assert res['first_name'] == 'new_name'
         assert rv.status_code == 200
 
+    def test_filter_user_no_results(self):
+        rv = self.create_user("test1")
+        rv = self.client.get('/api/users')
+        res = json.loads(rv.data)
+        assert len(res['objects']) == 1
+        rv = self.client.put('/api/users/test1', data=json.dumps(
+                             {'first_name': 'test_name'}
+                             ), follow_redirects=True)
+        rv = self.client.get('/api/users?first_name=derp')
+        res = json.loads(rv.data)
+        assert res['objects'] == []
+        assert len(res['objects']) == 0
+        assert rv.status_code == 200
+
+    def test_filter_user_one_results(self):
+        rv = self.create_user("test1")
+        rv = self.create_user("test2")
+        rv = self.client.get('/api/users')
+        res = json.loads(rv.data)
+        assert len(res['objects']) == 2
+        rv = self.client.put('/api/users/test1', data=json.dumps(
+                             {'first_name': 'test_name'}
+                             ), follow_redirects=True)
+        rv = self.client.get('/api/users?first_name=test_name')
+        res = json.loads(rv.data)
+        assert len(res['objects']) == 1
+        assert rv.status_code == 200
+
+    def test_filter_user_two_results(self):
+        rv = self.create_user("test1")
+        rv = self.create_user("test2")
+        rv = self.create_user("test3")
+        rv = self.client.get('/api/users')
+        res = json.loads(rv.data)
+        assert len(res['objects']) == 3
+        rv = self.client.put('/api/users/test2', data=json.dumps(
+                             {'first_name': 'derp'}
+                             ), follow_redirects=True)
+        rv = self.client.put('/api/users/test1', data=json.dumps(
+                             {'first_name': 'derply'}
+                             ), follow_redirects=True)
+        rv = self.client.put('/api/users/test3', data=json.dumps(
+                             {'first_name': 'hiyo'}
+                             ), follow_redirects=True)
+        rv = self.client.get('/api/users?first_name=derp')
+        res = json.loads(rv.data)
+        assert len(res['objects']) == 2
+        assert rv.status_code == 200
+
+    def test_filter_user_and_one_results(self):
+        rv = self.create_user("test1")
+        rv = self.create_user("test2")
+        rv = self.create_user("test3")
+        rv = self.client.get('/api/users')
+        res = json.loads(rv.data)
+        assert len(res['objects']) == 3
+        rv = self.client.put('/api/users/test2', data=json.dumps(
+                             {'first_name': 'derp',
+                              'last_name': 'herp'}
+                             ), follow_redirects=True)
+        rv = self.client.put('/api/users/test1', data=json.dumps(
+                             {'first_name': 'derply',
+                              'last_name': 'hiyo'}
+                             ), follow_redirects=True)
+        rv = self.client.put('/api/users/test3', data=json.dumps(
+                             {'first_name': 'hiyo',
+                              'last_name': 'herp'}
+                             ), follow_redirects=True)
+        rv = self.client.get('/api/users?first_name=derp&last_name=hi')
+        res = json.loads(rv.data)
+        assert len(res['objects']) == 1
+        assert rv.status_code == 200
+
     def test_put_user_with_lastname(self):
         rv = self.create_user("test1")
         res = json.loads(rv.data)
@@ -153,6 +226,7 @@ class UserTest(unittest.TestCase):
         assert rv.status_code == 405
 
     def test_error_put_user_with_id(self):
+        """READONLY TEST"""
         rv = self.create_user("test1")
         rv = self.client.put('/api/users/test1', data=json.dumps(
                              {'id': 'test-id'}
@@ -161,6 +235,7 @@ class UserTest(unittest.TestCase):
         assert rv.status_code == 403
 
     def test_error_put_user_with_username(self):
+        """READONLY TEST"""
         rv = self.create_user("test1")
         rv = self.client.put('/api/users/test1', data=json.dumps(
                              {'username': 'test-id'}

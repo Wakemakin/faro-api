@@ -1,8 +1,12 @@
+import logging
+
 from sqlalchemy import func
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy import Column, DateTime
 
 from faro_api.exceptions import common as exc
+
+logger = logging.getLogger("faro-api."+__name__)
 
 
 class Base(object):
@@ -21,6 +25,9 @@ class Base(object):
         pass
 
     def read_only_columns(self):
+        return []
+
+    def query_columns(self):
         return []
 
     def update(self, **kwargs):

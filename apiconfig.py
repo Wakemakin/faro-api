@@ -9,6 +9,7 @@ class Config(object):
     DEBUG = False
     TESTING = False
     DATABASE_CONNECT_OPTIONS = {}
+    DEFAULT_PAGE_SIZE = 15
 
 
 class DevelopmentConfig(Config):

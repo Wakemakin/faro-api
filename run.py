@@ -1,3 +1,5 @@
+import sys
+import logging
 import argparse
 
 
@@ -19,5 +21,15 @@ if args.database:
         pass
     #db.init_db()
 
+logger = logging.getLogger('faro_api')
+logger.setLevel(logging.DEBUG)
+ch = logging.StreamHandler(sys.stdout)
+log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+formatter = logging.Formatter(log_format)
+
+ch.setFormatter(formatter)
+logger.addHandler(ch)
+
 from faro_api import app
+logger.debug("Starting faro-api node")
 app().run(debug=True, host='127.0.0.1', port=5002)

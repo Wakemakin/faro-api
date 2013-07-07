@@ -22,17 +22,24 @@ class BaseApi(MethodView):
 
     def get(self, id, **kwargs):
         session = g.session
+        filters = request.args
+        q = session.query(self.base_resource)
         if id is None:
             res = list()
-            results = session.query(self.base_resource).all()
+            if len(filters):
+                q = db.create_filters(q, self.base_resource, filters)
+            total = q.count()
+            q, output = db.handle_paging(q, filters, total, request.url)
+            results = q.all()
             if results is not None:
                 for result in results:
                     res.append(result.to_dict(**kwargs))
-            return jsonify(objects=res), 200, {}
+            return jsonify(objects=res, **output), 200, {}
         try:
             result = db.get_one(session, self.base_resource, id,
                                 self.alternate_key)
-            return jsonify(objects=result.to_dict(**kwargs)), 200, {}
+            return jsonify(objects=result.to_dict(**kwargs),
+                           paging={"total": 100}), 200, {}
         except NoResultFound:
             raise exc.NotFound()
 

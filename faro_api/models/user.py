@@ -14,8 +14,15 @@ class User(db.model()):
         super(User, self).__init__(**kwargs)
         self.id = unicode(make_uuid())
 
-    def read_only_columns(self):
+    @staticmethod
+    def read_only_columns():
         return ['username']
+
+    @staticmethod
+    def query_columns():
+        return ['first_name',
+                'last_name',
+                'date_created']
 
     def to_dict(self, with_events=False):
         ret = {'username': self.username,
