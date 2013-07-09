@@ -1,32 +1,21 @@
-Project faro
+faro-api
 ======
 
-Project faro is a service that allows users to collaboratively plan events and then
-will handle the organization of participants during the lifetime of the event.
+The faro-api is the service node that provides access to the models of the faro
+platform.
 
-Alpha 2
+Alpha 3
 =======
-Alpha 2 is a raw flask RESTful api not using flask-restless. It aims to be more
-powerful and configurable than Alpha 1. It will be running on port 5002 on the
-same host and its availability is random at best, zero and worst.
+
+Alpha 3 is the current version of the RESTful faro-api. It is running on port
+5001 and has replaced alpha 1.
 
 It has support for the following resources:
 
 * Users at /api/users
 * Events at /api/events
-* Choices at /api/choices
 
-Alpha 1
-=======
-
-Alpha 1 is an extremely simple version of the Faro API. It has support for the
-following resources:
-
-* Users at /api/users
-* Events at /api/events
-* Choices at /api/choices
-
-To use Alpha 1
+To use Alpha 3
 --------------
 
 Using Alpha 1 isn't meant to be simple or nice, but it is meant to teach you
@@ -39,7 +28,6 @@ On a linux type machine with git perform the following steps::
   $ resty http://jibely.com:5001 -H "Content-type:application/json"
   $ GET /api/users
   $ GET /api/events
-  $ GET /api/choices
   $ POST /api/users -d '{"name":"<some username>"}'
   $ GET /api/users/<some user uuid>
   $ DELETE /api/users/<some user uuid>
