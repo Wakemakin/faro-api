@@ -45,33 +45,21 @@ Just a summary of what is happening above:
   at passed resource relative to the global resty URL target
 - Data is passed to curl using -d, and jibely.com is expecting json
 
-Expected and known issues:
+Expected and known issues
+-------------------------
 
-- There is no attempt to maintain foreign key (FK) constraints
 - Sometimes errors are not returned in a proper format (all of them should be
   json)
 - The service is currently running on a tmux session and is subject to the
   whims of the tmux owner
 
-Service Features
-================
+Supported features as of tag:alpha3
+----------------------------------
 
-* Simple creation of events with multiple components
-* Collaborative decision making for all participants in the event
-* Component selection based on selected component (if a certain component is
-  selected then other components become available or unavailable)
-* A component that provides suggestions (like a suggestion box) which are then
-  available to be voted on 
-
-Project Components
-==================
-
-* a RESTful service
-* a web front-end
-* multiple mobile apps
-
-RESTful Service
-===============
-
-* OAuth Support
-
+- CRUD support for /api/users
+- CRUD support for /api/events (requires valid user)
+- Username substitution for User UUID on all queries
+- Event association between events and users
+- Access of user events through /api/users/id/events
+- Access of event owner through /api/events/id/owner
+- Creation of event under user POST to /api/users/id/events
