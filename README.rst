@@ -15,6 +15,19 @@ It has support for the following resources:
 * Users at /api/users
 * Events at /api/events
 
+Deploying Alpha 3
+-----------------
+
+On a linux type machine with git, and virtualenv perform the following steps::
+
+  $ git clone https://github.com/Wakemakin/faro-api.git
+  $ cd faro-api
+  $ virtualenv --prompt="(faro-api)" --distribute --no-site-packages .venv
+  $ source .venv/bin/activate
+  $ pip install -r pip-requirements.txt
+  $ python run.py --database
+
+
 To use Alpha 3
 --------------
 
