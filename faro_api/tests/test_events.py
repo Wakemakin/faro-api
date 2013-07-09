@@ -5,7 +5,7 @@ import json
 import faro_api
 from faro_api import utils
 
-logger = logging.getLogger("faro-api."+__name__)
+logger = logging.getLogger("faro_api."+__name__)
 
 
 class EventTest(unittest.TestCase):

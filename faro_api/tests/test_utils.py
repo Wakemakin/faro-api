@@ -3,7 +3,7 @@ import unittest
 import logging
 from faro_api import utils
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('faro_api.'+__name__)
 
 
 class UserTest(unittest.TestCase):

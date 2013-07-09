@@ -6,7 +6,7 @@ from sqlalchemy import Column, DateTime
 
 from faro_api.exceptions import common as exc
 
-logger = logging.getLogger("faro-api."+__name__)
+logger = logging.getLogger("faro_api."+__name__)
 
 
 class Base(object):

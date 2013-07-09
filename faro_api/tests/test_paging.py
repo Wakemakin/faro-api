@@ -4,7 +4,7 @@ import json
 
 import faro_api
 
-logger = logging.getLogger("faro-api."+__name__)
+logger = logging.getLogger("faro_api."+__name__)
 
 
 class PageTest(unittest.TestCase):
@@ -16,6 +16,13 @@ class PageTest(unittest.TestCase):
         self.pages = 10
         self.remainder = self.page_size / 2
 
+        self.psq = self.app.config['PAGE_SIZE_QUERY']
+        self.pq = self.app.config['PAGE_QUERY']
+        self.tq = self.app.config['PAGE_TOTAL_QUERY']
+        self.pnq = self.app.config['PAGE_NUMBER_QUERY']
+        self.pnext = self.app.config['PAGE_NEXT']
+        self.pprev = self.app.config['PAGE_PREVIOUS']
+
     def tearDown(self):
         import os
         os.remove(self.app.config['DATABASE_FILE'])
@@ -25,6 +32,52 @@ class PageTest(unittest.TestCase):
         return self.client.post('/api/users', data=json.dumps(
                                 {'username': name}
                                 ), follow_redirects=True)
+
+    def test_get_no_users_default_paging(self):
+        rv = self.client.get('/api/users')
+        res = json.loads(rv.data)
+        assert len(res['objects']) == 0
+        assert res['total'] == 0
+        assert res['page_number'] == 1
+        assert 'next' not in res
+        assert 'prev' not in res
+        assert res['page_size'] == self.page_size
+
+    def test_get_few_users_default_paging(self):
+        total = self.page_size / 2
+        [self.create_user(str(x)) for x in range(total)]
+        rv = self.client.get('/api/users')
+        res = json.loads(rv.data)
+        assert len(res['objects']) == total
+        assert res['total'] == total
+        assert res['page_number'] == 1
+        assert 'next' not in res
+        assert 'prev' not in res
+        assert res['page_size'] == self.page_size
+
+    def test_get_few_users_pageltzero(self):
+        total = self.page_size / 2
+        [self.create_user(str(x)) for x in range(total)]
+        rv = self.client.get('/api/users?p=-2')
+        assert rv.status_code == 404
+
+    def test_get_few_users_pagezero(self):
+        total = self.page_size / 2
+        [self.create_user(str(x)) for x in range(total)]
+        rv = self.client.get('/api/users?p=0')
+        assert rv.status_code == 404
+
+    def test_get_few_users_page1(self):
+        total = self.page_size / 2
+        [self.create_user(str(x)) for x in range(total)]
+        rv = self.client.get('/api/users?p=1')
+        res = json.loads(rv.data)
+        assert len(res['objects']) == total
+        assert res['total'] == total
+        assert res['page_number'] == 1
+        assert 'next' not in res
+        assert 'prev' not in res
+        assert res['page_size'] == self.page_size
 
     def test_get_lots_of_users_default_paging(self):
         total = self.page_size * self.pages + self.remainder
@@ -37,7 +90,7 @@ class PageTest(unittest.TestCase):
         assert res['total'] == total
         assert res['page_number'] == 1
         assert 'next' in res
-        assert res['next'] == 'http://localhost/api/users?p=2'
+        assert 'p=2' in res['next']
         assert 'prev' not in res
         assert res['page_size'] == self.page_size
 
@@ -45,31 +98,25 @@ class PageTest(unittest.TestCase):
         total = self.page_size * self.pages + self.remainder
         [self.create_user(str(x)) for x in range(total)]
         rv = self.client.get('/api/users?p=-2')
-        res = json.loads(rv.data)
-        assert len(res['objects']) == self.page_size
-        for x in range(self.page_size):
-            assert res['objects'][x]['username'] == str(x)
-        assert res['total'] == total
-        assert res['page_number'] == 1
-        assert 'next' in res
-        assert res['next'] == 'http://localhost/api/users?p=2'
-        assert 'prev' not in res
-        assert res['page_size'] == self.page_size
+        assert rv.status_code == 404
+
+    def test_get_lots_of_users_page_too_far(self):
+        total = self.page_size * self.pages + self.remainder
+        [self.create_user(str(x)) for x in range(total)]
+        rv = self.client.get('/api/users?p=%s' % str(self.pages + 2))
+        assert rv.status_code == 404
+
+    def test_get_lots_of_users_page_really_far(self):
+        total = self.page_size * self.pages + self.remainder
+        [self.create_user(str(x)) for x in range(total)]
+        rv = self.client.get('/api/users?p=%s' % str(self.pages + 100000000))
+        assert rv.status_code == 404
 
     def test_get_lots_of_users_default_pagezero(self):
         total = self.page_size * self.pages + self.remainder
         [self.create_user(str(x)) for x in range(total)]
         rv = self.client.get('/api/users?p=0')
-        res = json.loads(rv.data)
-        assert len(res['objects']) == self.page_size
-        for x in range(self.page_size):
-            assert res['objects'][x]['username'] == str(x)
-        assert res['total'] == total
-        assert res['page_number'] == 1
-        assert 'next' in res
-        assert res['next'] == 'http://localhost/api/users?p=2'
-        assert 'prev' not in res
-        assert res['page_size'] == self.page_size
+        assert rv.status_code == 404
 
     def test_get_lots_of_users_default_page1(self):
         total = self.page_size * self.pages + self.remainder
@@ -82,7 +129,7 @@ class PageTest(unittest.TestCase):
         assert res['total'] == total
         assert res['page_number'] == 1
         assert 'next' in res
-        assert res['next'] == 'http://localhost/api/users?p=2'
+        assert 'p=2' in res['next']
         assert 'prev' not in res
         assert res['page_size'] == self.page_size
 
@@ -96,9 +143,9 @@ class PageTest(unittest.TestCase):
         assert res['total'] == total
         assert res['page_number'] == 2
         assert 'next' in res
-        assert res['next'] == 'http://localhost/api/users?p=3'
+        assert 'p=3' in res['next']
         assert 'prev' in res
-        assert res['prev'] == 'http://localhost/api/users?p=1'
+        assert 'p=1' in res['prev']
         assert res['page_size'] == self.page_size
 
     def test_iterate_using_next(self):

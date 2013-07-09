@@ -8,7 +8,7 @@ from faro_api.exceptions import common as exc
 from faro_api import database as db
 from faro_api import utils
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('faro_api.'+__name__)
 
 
 class BaseApi(MethodView):

@@ -12,7 +12,7 @@ from faro_api import utils as utils
 from faro_api.exceptions import common as exc
 
 
-logger = logging.getLogger("faro-api."+__name__)
+logger = logging.getLogger("faro_api."+__name__)
 
 
 @utils.static_var("instance", None)
@@ -62,42 +62,57 @@ def create_filters(query, cls, filter_list):
 
 def handle_paging(query, filters, total, url):
     page = 1
-    max = current_app.config['DEFAULT_PAGE_SIZE']
+    page_size = current_app.config['DEFAULT_PAGE_SIZE']
     if 'p' in filters:
         page = filters.get('p', type=int)
-        if page <= 0:
-            page = 1
-    if 'max_results' in filters:
-        max = filters.get('max_results')
-    output = {'total': total, 'page_number': page, 'page_size': max}
+    if 'page_size' in filters:
+        page_size = filters.get('page_size', type=int)
+    if page_size > current_app.config['MAXIMUM_PAGE_SIZE']:
+        page_size = current_app.config['MAXIMUM_PAGE_SIZE']
+    page_total = page_size * (page - 1)
+    if page <= 0 or page_total > total:
+        raise exc.NotFound()
+    output = {'total': total, 'page_number': page, 'page_size': page_size}
     o = urlparse.urlsplit(url)
+    logger.debug(o)
     if len(o.query) > 0:
-        if page > 1:
-            qs = urlparse.parse_qsl(o.query)
-            qs = urlencode([(name, int(value) - 1 if name == 'p' else value)
-                            for name, value in qs])
-            new_url = urlparse.urlunsplit([o.scheme, o.netloc, o.path,
-                                           qs, o.fragment])
-            output['prev'] = new_url
-        if page * max < total:
-            qs = urlparse.parse_qsl(o.query)
-            qs_list = []
-            for name, value in qs:
-                value = int(value)
-                if name == 'p':
-                    if value < 1:
-                        value = 1
-                    qs_list.append((name, value+1))
-                else:
-                    qs_list.append((name, value))
-            qs = urlencode(qs_list)
-            new_url = urlparse.urlunsplit([o.scheme, o.netloc, o.path,
-                                           qs, o.fragment])
-            output['next'] = new_url
-    else:
+        if 'p' in filters:
+            if page > 1:
+                qs = urlparse.parse_qsl(o.query)
+                qs = urlencode([(name, int(value) - 1
+                                if name == 'p' else value)
+                                for name, value in qs])
+                new_url = urlparse.urlunsplit([o.scheme, o.netloc, o.path,
+                                               qs, o.fragment])
+                output['prev'] = new_url
+            if total > page_size and page * page_size < total:
+                qs = urlparse.parse_qsl(o.query)
+                qs = urlencode([(name, int(value) + 1
+                                if name == 'p' else value)
+                                for name, value in qs])
+                new_url = urlparse.urlunsplit([o.scheme, o.netloc, o.path,
+                                               qs, o.fragment])
+                output['next'] = new_url
+        else:
+            if page > 1:
+                qs = urlparse.parse_qsl(o.query)
+                qs.append(('p', page - 1))
+                qs = urlencode(qs)
+                new_url = urlparse.urlunsplit([o.scheme, o.netloc, o.path,
+                                               qs, o.fragment])
+                output['prev'] = new_url
+            if total > page_size and page * page_size < total:
+                qs = urlparse.parse_qsl(o.query)
+                qs.append(('p', page + 1))
+                qs = urlencode(qs)
+                new_url = urlparse.urlunsplit([o.scheme, o.netloc, o.path,
+                                               qs, o.fragment])
+                output['next'] = new_url
+            pass
+    elif total > page_size:
         output['next'] = url + '?p=2'
     page = page - 1
-    return query.slice(page * max, page * max + max), output
+    return query.slice(page * page_size, page * page_size + page_size), output
 
 
 class Base(object):

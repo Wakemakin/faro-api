@@ -4,7 +4,7 @@ from flask import Blueprint
 
 
 mod = Blueprint('endpoint', __name__)
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('faro_api.'+__name__)
 
 
 @mod.route('/', methods=['GET'])
