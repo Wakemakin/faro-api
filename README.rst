@@ -25,7 +25,12 @@ On a linux type machine with git, and virtualenv perform the following steps::
   $ virtualenv --prompt="(faro-api)" --distribute --no-site-packages .venv
   $ source .venv/bin/activate
   $ pip install -r pip-requirements.txt
-  $ python run.py --database
+  $ python run.py
+
+Args that can be passed to python run.py:
+
+  - --database: will recreate and initialize the faro-api.database
+  - --public: will run the service on an forward listening interface
 
 
 To use Alpha 3
