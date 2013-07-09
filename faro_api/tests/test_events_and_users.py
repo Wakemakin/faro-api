@@ -1,6 +1,6 @@
-import unittest
-import logging
 import json
+import logging
+import unittest
 
 import faro_api
 from faro_api import utils

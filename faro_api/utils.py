@@ -2,9 +2,8 @@ import json
 import re
 import uuid
 
-from flask import jsonify, request
-from werkzeug.exceptions import default_exceptions
-from werkzeug.exceptions import HTTPException
+import flask
+import werkzeug.exceptions as http
 
 from faro_api.exceptions import common as exc
 
@@ -25,7 +24,7 @@ def static_var(varname, value):
 
 def require_body(func):
     def check_body_exists(*args, **kwargs):
-        if len(request.data) == 0:
+        if len(flask.request.data) == 0:
             raise exc.RequiresBody()
         return func(*args, **kwargs)
     return check_body_exists
@@ -63,15 +62,16 @@ def is_uuid(uuid_str):
 def make_json_app(app, **kwargs):
     def make_json_error(ex):
         if hasattr(ex, "information"):
-            response = jsonify(message=str(ex), information=ex.information)
+            response = flask.jsonify(message=str(ex),
+                                     information=ex.information)
         else:
-            response = jsonify(message=str(ex))
+            response = flask.jsonify(message=str(ex))
         response.status_code = (ex.code
-                                if isinstance(ex, HTTPException)
+                                if isinstance(ex, http.HTTPException)
                                 else 500)
         return response
 
-    for code in default_exceptions.iterkeys():
+    for code in http.default_exceptions.iterkeys():
         app.error_handler_spec[None][code] = make_json_error
 
     return app

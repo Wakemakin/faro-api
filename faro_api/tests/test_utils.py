@@ -1,6 +1,7 @@
-import uuid
-import unittest
 import logging
+import unittest
+import uuid
+
 from faro_api import utils
 
 logger = logging.getLogger('faro_api.'+__name__)
@@ -15,12 +16,12 @@ class UserTest(unittest.TestCase):
         pass
 
     def test_generate_temp_database(self):
-        """Ensure that the file names created are unique each time"""
+        """Ensure that the file names created are unique each time."""
         filenames = set([utils.generate_temp_database() for i in range(100)])
         assert len(filenames) == 100
 
     def test_static_var_decorator(self):
-        """Ensure that static variables in functions are carried over"""
+        """Ensure that static variables in functions are carried over."""
         @utils.static_var("c", 0)
         def counting_function():
             counting_function.c += 1

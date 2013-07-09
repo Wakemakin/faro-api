@@ -1,6 +1,6 @@
-import unittest
-import logging
 import json
+import logging
+import unittest
 
 import faro_api
 from faro_api import utils
@@ -227,7 +227,6 @@ class UserTest(unittest.TestCase):
         assert rv.status_code == 405
 
     def test_error_put_user_with_id(self):
-        """READONLY TEST"""
         rv = self.create_user("test1")
         rv = self.client.put('/api/users/test1', data=json.dumps(
                              {'id': 'test-id'}
@@ -235,7 +234,6 @@ class UserTest(unittest.TestCase):
         assert rv.status_code == 403
 
     def test_error_put_user_with_username(self):
-        """READONLY TEST"""
         rv = self.create_user("test1")
         rv = self.client.put('/api/users/test1', data=json.dumps(
                              {'username': 'test-id'}

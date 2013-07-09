@@ -1,8 +1,7 @@
 import logging
 
-from sqlalchemy import func
-from sqlalchemy.ext.declarative import declared_attr
-from sqlalchemy import Column, DateTime
+import sqlalchemy as sa
+import sqlalchemy.ext.declarative as decl
 
 from faro_api.exceptions import common as exc
 
@@ -12,11 +11,11 @@ logger = logging.getLogger("faro_api."+__name__)
 class Base(object):
     _read_only_base = ['id', 'date_created']
 
-    @declared_attr
+    @decl.declared_attr
     def __tablename__(cls):
         return cls.__name__.lower() + "s"
 
-    date_created = Column(DateTime, default=func.now())
+    date_created = sa.Column(sa.DateTime, default=sa.func.now())
 
     def __init__(self, **kwargs):
         pass

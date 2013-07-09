@@ -1,13 +1,13 @@
-from flask import Flask, g
+import flask
 
-import faro_api.utils as utils
 import faro_api.database as db
+import faro_api.utils as utils
 
 
 @utils.static_var("instance", None)
 def app(testing=False):
     if testing or app.instance is None:
-        app.instance = utils.make_json_app(Flask(__name__))
+        app.instance = utils.make_json_app(flask.Flask(__name__))
         config = 'apiconfig.DevelopmentConfig'
         if testing:
             config = 'apiconfig.TestConfig'
@@ -20,11 +20,11 @@ def app(testing=False):
 
         @app.instance.before_request
         def before_request():
-            g.session = session
+            flask.g.session = session
 
         from faro_api.views import endpoint
-        from faro_api.views import users
         from faro_api.views import events
+        from faro_api.views import users
         app.instance.register_blueprint(endpoint.mod)
         user_bp = users.UserApi()
         event_bp = events.EventApi()

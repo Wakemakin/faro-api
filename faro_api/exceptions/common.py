@@ -1,7 +1,7 @@
-from werkzeug.exceptions import HTTPException
+import werkzeug.exceptions as http
 
 
-class FaroException(HTTPException):
+class FaroException(http.HTTPException):
     code = 500
 
     def __init__(self, **kwargs):

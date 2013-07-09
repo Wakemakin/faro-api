@@ -1,15 +1,14 @@
-from flask import current_app
+import flask
 import logging
+import urllib
 import urlparse
-from urllib import urlencode
 
-from sqlalchemy import create_engine, func
-from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy.ext.declarative import declarative_base, declared_attr
-from sqlalchemy import Column, DateTime
+import sqlalchemy as sa
+import sqlalchemy.ext.declarative as decl
+import sqlalchemy.orm as orm
 
-from faro_api import utils as utils
 from faro_api.exceptions import common as exc
+from faro_api import utils as utils
 
 
 logger = logging.getLogger("faro_api."+__name__)
@@ -18,25 +17,25 @@ logger = logging.getLogger("faro_api."+__name__)
 @utils.static_var("instance", None)
 def model():
     if model.instance is None:
-        model.instance = declarative_base(cls=Base)
+        model.instance = decl.declarative_base(cls=Base)
     return model.instance
 
 
 def create_db_environment(app):
-    engine = create_engine(app.config['DATABASE_URI'],
-                           convert_unicode=True,
-                           **app.config['DATABASE_CONNECT_OPTIONS'])
-    db_session = scoped_session(sessionmaker(autocommit=False,
-                                             autoflush=False,
-                                             bind=engine))
+    engine = sa.create_engine(app.config['DATABASE_URI'],
+                              convert_unicode=True,
+                              **app.config['DATABASE_CONNECT_OPTIONS'])
+    db_session = orm.scoped_session(orm.sessionmaker(autocommit=False,
+                                                     autoflush=False,
+                                                     bind=engine))
 
     @app.teardown_request
     def remove_db_session(exception):
         db_session.remove()
         db_session.close()
 
-    from faro_api.models import user
     from faro_api.models import event
+    from faro_api.models import user
     [user, event]
     model().metadata.create_all(bind=engine)
 
@@ -67,13 +66,13 @@ def create_filters(query, cls, filter_list, additional_filters):
 
 def handle_paging(query, filters, total, url):
     page = 1
-    page_size = current_app.config['DEFAULT_PAGE_SIZE']
+    page_size = flask.current_app.config['DEFAULT_PAGE_SIZE']
     if 'p' in filters:
         page = filters.get('p', type=int)
     if 'page_size' in filters:
         page_size = filters.get('page_size', type=int)
-    if page_size > current_app.config['MAXIMUM_PAGE_SIZE']:
-        page_size = current_app.config['MAXIMUM_PAGE_SIZE']
+    if page_size > flask.current_app.config['MAXIMUM_PAGE_SIZE']:
+        page_size = flask.current_app.config['MAXIMUM_PAGE_SIZE']
     page_total = page_size * (page - 1)
     if page <= 0 or page_total > total:
         raise exc.NotFound()
@@ -84,17 +83,17 @@ def handle_paging(query, filters, total, url):
         if 'p' in filters:
             if page > 1:
                 qs = urlparse.parse_qsl(o.query)
-                qs = urlencode([(name, int(value) - 1
-                                if name == 'p' else value)
-                                for name, value in qs])
+                qs = urllib.urlencode([(name, int(value) - 1
+                                      if name == 'p' else value)
+                                      for name, value in qs])
                 new_url = urlparse.urlunsplit([o.scheme, o.netloc, o.path,
                                                qs, o.fragment])
                 output['prev'] = new_url
             if total > page_size and page * page_size < total:
                 qs = urlparse.parse_qsl(o.query)
-                qs = urlencode([(name, int(value) + 1
-                                if name == 'p' else value)
-                                for name, value in qs])
+                qs = urllib.urlencode([(name, int(value) + 1
+                                      if name == 'p' else value)
+                                      for name, value in qs])
                 new_url = urlparse.urlunsplit([o.scheme, o.netloc, o.path,
                                                qs, o.fragment])
                 output['next'] = new_url
@@ -102,14 +101,14 @@ def handle_paging(query, filters, total, url):
             if page > 1:
                 qs = urlparse.parse_qsl(o.query)
                 qs.append(('p', page - 1))
-                qs = urlencode(qs)
+                qs = urllib.urlencode(qs)
                 new_url = urlparse.urlunsplit([o.scheme, o.netloc, o.path,
                                                qs, o.fragment])
                 output['prev'] = new_url
             if total > page_size and page * page_size < total:
                 qs = urlparse.parse_qsl(o.query)
                 qs.append(('p', page + 1))
-                qs = urlencode(qs)
+                qs = urllib.urlencode(qs)
                 new_url = urlparse.urlunsplit([o.scheme, o.netloc, o.path,
                                                qs, o.fragment])
                 output['next'] = new_url
@@ -123,11 +122,11 @@ def handle_paging(query, filters, total, url):
 class Base(object):
     _read_only_base = ['id', 'date_created']
 
-    @declared_attr
+    @decl.declared_attr
     def __tablename__(cls):
         return cls.__name__.lower() + "s"
 
-    date_created = Column(DateTime, default=func.now())
+    date_created = sa.Column(sa.DateTime, default=sa.func.now())
 
     def __init__(self, **kwargs):
         pass

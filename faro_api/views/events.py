@@ -1,15 +1,15 @@
 import logging
 
-from flask import Blueprint, request, g
-from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy.exc import IntegrityError
+import flask
+import sqlalchemy.exc
+import sqlalchemy.orm.exc as sa_exc
 
-from faro_api.views.common import BaseApi
 from faro_api import database as db
-from faro_api.models.event import Event
-from faro_api.models.user import User
-from faro_api import utils
 from faro_api.exceptions import common as exc
+from faro_api.models import event as event_model
+from faro_api.models import user as user_model
+from faro_api import utils
+from faro_api.views.common import BaseApi
 
 logger = logging.getLogger('faro_api.'+__name__)
 
@@ -27,10 +27,10 @@ class EventNameRequired(exc.FaroException):
 class EventApi(BaseApi):
     def __init__(self):
         super(EventApi, self).__init__()
-        self.base_resource = Event
+        self.base_resource = event_model.Event
 
     def _configure_endpoint(self):
-        mod = Blueprint('events', __name__)
+        mod = flask.Blueprint('events', __name__)
 
         event_view = self.as_view('event_api')
         mod.add_url_rule('/api/users/<string:userid>/events',
@@ -49,27 +49,29 @@ class EventApi(BaseApi):
         self.blueprint = mod
 
     def get(self, id, userid):
-        session = g.session
-        filters = request.args
+        session = flask.g.session
+        filters = flask.request.args
         if userid is None:
             if 'owner_id' in filters:
                 user_id = filters.getlist('owner_id')[0]
-                user = db.get_one(session, User, user_id, "username")
+                user = db.get_one(session, user_model.User, user_id,
+                                  "username")
                 self.additional_filters['owner_id'] = user.id
             return super(EventApi, self).get(id, with_owner=True)
         else:
             user_id = userid
             try:
-                user = db.get_one(session, User, user_id, "username")
+                user = db.get_one(session, user_model.User, user_id,
+                                  "username")
                 self.additional_filters['owner_id'] = user.id
-            except NoResultFound:
+            except sa_exc.NoResultFound:
                 raise exc.NotFound()
             return super(EventApi, self).get(id, with_owner=True)
         raise exc.NotFound()
 
     def put(self, id, userid):
-        session = g.session
-        data = utils.json_request_data(request.data)
+        session = flask.g.session
+        data = utils.json_request_data(flask.request.data)
         if not data:
             raise exc.BodyRequired()
         with_owner = False
@@ -77,11 +79,12 @@ class EventApi(BaseApi):
         if 'owner_id' in data:
             user_id = data['owner_id']
             try:
-                user = db.get_one(session, User, user_id, "username")
+                user = db.get_one(session, user_model.User, user_id,
+                                  "username")
                 data['owner_id'] = user.id
                 attachments = {'owner': user}
                 with_owner = True
-            except NoResultFound:
+            except sa_exc.NoResultFound:
                 raise exc.NotFound(information="Owner not found")
         return super(EventApi, self).put(id, with_owner=with_owner,
                                          attachments=attachments)
@@ -91,8 +94,8 @@ class EventApi(BaseApi):
 
     @utils.require_body
     def post(self, userid):
-        session = g.session
-        data = utils.json_request_data(request.data)
+        session = flask.g.session
+        data = utils.json_request_data(flask.request.data)
         if not data:
             raise exc.RequiresBody()
         with_owner = False
@@ -104,15 +107,15 @@ class EventApi(BaseApi):
         else:
             user_id = data['owner_id']
         try:
-            user = db.get_one(session, User, user_id, "username")
+            user = db.get_one(session, user_model.User, user_id, "username")
             data['owner_id'] = user.id
             attachments = {'owner': user}
             with_owner = True
-        except NoResultFound:
+        except sa_exc.NoResultFound:
             raise exc.NotFound(information="Owner not found")
         try:
             return super(EventApi, self).post(with_owner=with_owner,
                                               attachments=attachments)
-        except IntegrityError as e:
+        except sqlalchemy.exc.IntegrityError as e:
             logger.error(e)
             raise EventNameRequired()

@@ -1,14 +1,14 @@
 import logging
 
-from flask import Blueprint, g
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm.exc import NoResultFound
+import flask
+import sqlalchemy.exc
+import sqlalchemy.orm.exc
 
-from faro_api.views.common import BaseApi
 from faro_api import database as db
-from faro_api.models.user import User
-from faro_api.models.event import Event
 from faro_api.exceptions import common as exc
+from faro_api.models.event import Event
+from faro_api.models.user import User
+from faro_api.views.common import BaseApi
 
 logger = logging.getLogger('faro_api.'+__name__)
 
@@ -25,7 +25,7 @@ class UserApi(BaseApi):
         self.alternate_key = "username"
 
     def _configure_endpoint(self):
-        mod = Blueprint('users', __name__)
+        mod = flask.Blueprint('users', __name__)
 
         user_view = self.as_view('user_api')
         mod.add_url_rule('/api/users',
@@ -44,19 +44,19 @@ class UserApi(BaseApi):
         self.blueprint = mod
 
     def get(self, id, eventid, **kwargs):
-        session = g.session
+        session = flask.g.session
         if eventid is not None:
             try:
                 event = db.get_one(session, Event, eventid)
                 return super(UserApi, self).get(event.owner_id,
                                                 with_events=True)
-            except NoResultFound:
+            except sqlalchemy.orm.exc.NoResultFound:
                 raise exc.NotFound()
         return super(UserApi, self).get(id, with_events=True)
 
     def post(self):
         try:
             return super(UserApi, self).post(with_events=True)
-        except IntegrityError as e:
+        except sqlalchemy.exc.IntegrityError as e:
             logger.error(e)
             raise UniqueUsernameRequired()
