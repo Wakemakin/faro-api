@@ -4,7 +4,9 @@ import argparse
 
 
 parser = argparse.ArgumentParser(description="Faro Service. Alpha 2")
-parser.add_argument("--database", help="initialize database only",
+parser.add_argument("--database", help="recreate database and initialize",
+                    action="store_true")
+parser.add_argument("--public", help="run on public host",
                     action="store_true")
 args = parser.parse_args()
 
@@ -32,4 +34,7 @@ logger.addHandler(ch)
 
 from faro_api import app
 logger.debug("Starting faro-api node")
-app().run(debug=True, host='127.0.0.1', port=5002)
+if args.public:
+    app().run(debug=True, host='0.0.0.0', port=5001)
+else:
+    app().run(debug=True, host='127.0.0.1', port=5002)
