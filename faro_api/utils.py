@@ -33,6 +33,8 @@ def require_body(func):
 
 def json_request_data(request_data):
     try:
+        if request_data == '{}':
+            return None
         return json.loads(request_data)
     except ValueError:
         raise exc.InvalidInput(information="Malformed body")

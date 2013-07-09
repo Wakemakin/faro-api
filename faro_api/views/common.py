@@ -16,6 +16,7 @@ class BaseApi(MethodView):
         self.base_resource = None
         self.alternate_key = None
         self._configure_endpoint()
+        self.additional_filters = {}
 
     def _configure_endpoint(self):
         pass
@@ -26,8 +27,9 @@ class BaseApi(MethodView):
         q = session.query(self.base_resource)
         if id is None:
             res = list()
-            if len(filters):
-                q = db.create_filters(q, self.base_resource, filters)
+            if len(filters) or len(self.additional_filters):
+                q = db.create_filters(q, self.base_resource,
+                                      filters, self.additional_filters)
             total = q.count()
             q, output = db.handle_paging(q, filters, total, request.url)
             results = q.all()
@@ -38,8 +40,7 @@ class BaseApi(MethodView):
         try:
             result = db.get_one(session, self.base_resource, id,
                                 self.alternate_key)
-            return jsonify(objects=result.to_dict(**kwargs),
-                           paging={"total": 100}), 200, {}
+            return jsonify(object=result.to_dict(**kwargs)), 200, {}
         except NoResultFound:
             raise exc.NotFound()
 
@@ -47,6 +48,8 @@ class BaseApi(MethodView):
     def post(self, **kwargs):
         session = g.session
         data = utils.json_request_data(request.data)
+        if not data:
+            raise exc.RequiresBody()
         try:
             result = self.base_resource(**data)
             if "attachments" in kwargs:
@@ -67,6 +70,8 @@ class BaseApi(MethodView):
     def put(self, id, **kwargs):
         session = g.session
         data = utils.json_request_data(request.data)
+        if not data:
+            raise exc.RequiresBody()
         try:
             result = db.get_one(session, self.base_resource, id,
                                 self.alternate_key)

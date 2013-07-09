@@ -40,8 +40,7 @@ class UserTest(unittest.TestCase):
         rv = self.create_user("test")
         rv = self.client.get('/api/users/test')
         res = json.loads(rv.data)
-        logger.debug(rv.data)
-        assert res['objects']['username'] == 'test'
+        assert res['object']['username'] == 'test'
 
     def test_get_one_user_by_id(self):
         rv = self.create_user("test")
@@ -49,9 +48,8 @@ class UserTest(unittest.TestCase):
         id = res['id']
         rv = self.client.get('/api/users/' + id)
         res = json.loads(rv.data)
-        logger.debug(rv.data)
-        assert res['objects']['username'] == 'test'
-        assert res['objects']['id'] == id
+        assert res['object']['username'] == 'test'
+        assert res['object']['id'] == id
 
     def test_get_multi_user(self):
         rv = self.create_user("test1")
@@ -101,7 +99,6 @@ class UserTest(unittest.TestCase):
         rv = self.client.put('/api/users/test1', data=json.dumps(
                              {'first_name': 'new_name'}
                              ), follow_redirects=True)
-        logger.debug(rv.status)
         res = json.loads(rv.data)
         assert res['first_name'] == 'new_name'
         assert rv.status_code == 200
@@ -186,7 +183,6 @@ class UserTest(unittest.TestCase):
         rv = self.client.put('/api/users/test1', data=json.dumps(
                              {'last_name': 'new_name'}
                              ), follow_redirects=True)
-        logger.debug(rv.status)
         res = json.loads(rv.data)
         assert res['last_name'] == 'new_name'
         assert rv.status_code == 200
@@ -217,12 +213,17 @@ class UserTest(unittest.TestCase):
         rv = self.client.get('/api/users/' + id)
         assert rv.status_code == 404
 
+    def test_error_post_empty_body(self):
+        rv = self.client.post('/api/users', data=json.dumps(
+                              {}
+                              ), follow_redirects=True)
+        assert rv.status_code == 400
+
     def test_error_post_user_with_made_user(self):
         rv = self.create_user("test1")
         rv = self.client.post('/api/users/test1', data=json.dumps(
                               {'id': 'test-id'}
                               ), follow_redirects=True)
-        logger.debug(rv.status)
         assert rv.status_code == 405
 
     def test_error_put_user_with_id(self):
@@ -231,7 +232,6 @@ class UserTest(unittest.TestCase):
         rv = self.client.put('/api/users/test1', data=json.dumps(
                              {'id': 'test-id'}
                              ), follow_redirects=True)
-        logger.debug(rv.status)
         assert rv.status_code == 403
 
     def test_error_put_user_with_username(self):
@@ -240,7 +240,6 @@ class UserTest(unittest.TestCase):
         rv = self.client.put('/api/users/test1', data=json.dumps(
                              {'username': 'test-id'}
                              ), follow_redirects=True)
-        logger.debug(rv.status)
         assert rv.status_code == 403
 
     def test_error_delete_fail_user(self):

@@ -7,18 +7,24 @@ from faro_api.utils import make_uuid
 
 class Event(db.model()):
     id = Column(Unicode, primary_key=True)
-    name = Column(Unicode)
+    name = Column(Unicode, nullable=False)
     description = Column(Unicode, nullable=True)
     is_template = Column(Boolean, default=False)
     parent_id = Column(Unicode, ForeignKey('events.id'))
     children = relationship('Event',
                             backref=backref('parent', remote_side=[id]))
-    owner_id = Column(Unicode, ForeignKey('users.id'))
+    owner_id = Column(Unicode, ForeignKey('users.id'), nullable=False)
     owner = relationship('User', backref=backref('events'))
 
     def __init__(self, **kwargs):
         super(Event, self).__init__(**kwargs)
         self.id = unicode(make_uuid())
+
+    @staticmethod
+    def query_columns():
+        return ['name',
+                'owner_id',
+                'is_template']
 
     def read_only_columns(self):
         return []

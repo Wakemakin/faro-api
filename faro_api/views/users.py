@@ -1,10 +1,13 @@
 import logging
 
-from flask import Blueprint
+from flask import Blueprint, g
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm.exc import NoResultFound
 
 from faro_api.views.common import BaseApi
+from faro_api import database as db
 from faro_api.models.user import User
+from faro_api.models.event import Event
 from faro_api.exceptions import common as exc
 
 logger = logging.getLogger('faro_api.'+__name__)
@@ -22,21 +25,34 @@ class UserApi(BaseApi):
         self.alternate_key = "username"
 
     def _configure_endpoint(self):
-        mod = Blueprint('users', __name__, url_prefix='/api/users')
+        mod = Blueprint('users', __name__)
 
         user_view = self.as_view('user_api')
-        mod.add_url_rule('', defaults={'id': None},
+        mod.add_url_rule('/api/users',
+                         defaults={'id': None, 'eventid': None},
                          view_func=user_view, methods=['GET'])
-        mod.add_url_rule('', view_func=user_view, methods=['POST'])
-        mod.add_url_rule('/<id>', view_func=user_view,
-                         methods=['GET', 'DELETE', 'PUT'])
+        mod.add_url_rule('/api/users',
+                         view_func=user_view, methods=['POST'])
+        mod.add_url_rule('/api/users/<id>', view_func=user_view,
+                         defaults={'eventid': None},
+                         methods=['GET'])
+        mod.add_url_rule('/api/users/<id>', view_func=user_view,
+                         methods=['DELETE', 'PUT'])
+        mod.add_url_rule('/api/events/<string:eventid>/owner',
+                         defaults={'id': None},
+                         methods=['GET'], view_func=user_view)
         self.blueprint = mod
 
-    def get(self, id, **kwargs):
+    def get(self, id, eventid, **kwargs):
+        session = g.session
+        if eventid is not None:
+            try:
+                event = db.get_one(session, Event, eventid)
+                return super(UserApi, self).get(event.owner_id,
+                                                with_events=True)
+            except NoResultFound:
+                raise exc.NotFound()
         return super(UserApi, self).get(id, with_events=True)
-
-    def put(self, id):
-        return super(UserApi, self).put(id, with_events=True)
 
     def post(self):
         try:

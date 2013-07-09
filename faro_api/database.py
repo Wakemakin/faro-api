@@ -52,11 +52,16 @@ def get_one(session, cls, filter_value, alternative_check=None):
     raise exc.NotFound()
 
 
-def create_filters(query, cls, filter_list):
+def create_filters(query, cls, filter_list, additional_filters):
     for column in cls.query_columns():
-        if column in filter_list:
+        """Additional_filters overrides query filters"""
+        if column in additional_filters:
+            value = additional_filters[column]
+            query = query.filter(getattr(cls, column) == value)
+        elif column in filter_list:
             value = filter_list.getlist(column)[0]
-            query = query.filter(getattr(cls, column).like("%%%s%%" % value))
+            query = query.filter(getattr(cls, column).
+                                 like("%%%s%%" % value))
     return query
 
 
