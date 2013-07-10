@@ -18,7 +18,8 @@ It has support for the following resources:
 Deploying Alpha 3
 -----------------
 
-On a linux type machine with git, and virtualenv perform the following steps::
+On a linux type machine with git, **curl**, and virtualenv perform the following
+steps::
 
   $ git clone https://github.com/Wakemakin/faro-api.git
   $ cd faro-api
