@@ -30,8 +30,8 @@ steps::
 
 Args that can be passed to python run.py:
 
-  - --database: will recreate and initialize the faro-api.database
-  - --public: will run the service on an forward listening interface
+* --database: will recreate and initialize the faro-api.database
+* --public: will run the service on an forward listening interface
 
 Testing Alpha 3
 ---------------
@@ -45,8 +45,8 @@ will need to run the following to test the code::
 This will run the unit tests on the API and will also run some code-standards
 checks based on:
 
-  - PEP8
-  - OpenStack standards
+* PEP8
+* OpenStack standards
 
 To use Alpha 3
 --------------
