@@ -80,7 +80,7 @@ Just a summary of what is happening above:
 Knowing What to Pass in POSTs
 -----------------------------
 
-You can find the columns that are needed for proper posting in the follwing
+You can find the columns that are needed for proper posting in the following
 directory::
 
   faro_api/models
@@ -88,6 +88,9 @@ directory::
 All of the models within there can be posted to except the Base model. Anything
 that has a sa.Column is a thing that can be posted to. For example (this may
 be an outdated version of user.py, but the example is fine):
+
+  .. code-block:: python
+
 
   class User(db.model()):
       id = sa.Column(sa.Unicode, primary_key=True)
