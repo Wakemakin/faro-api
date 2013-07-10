@@ -32,6 +32,20 @@ Args that can be passed to python run.py:
   - --database: will recreate and initialize the faro-api.database
   - --public: will run the service on an forward listening interface
 
+Testing Alpha 3
+---------------
+
+Within the virtual environment (you get in with: source .venv/bin/activate) you
+will need to run the following to test the code::
+
+  $ pip install tox
+  $ tox
+
+This will run the unit tests on the API and will also run some code-standards
+checks based on:
+
+  - PEP8
+  - OpenStack standards
 
 To use Alpha 3
 --------------
@@ -46,7 +60,7 @@ On a linux type machine with git perform the following steps::
   $ resty http://jibely.com:5001 -H "Content-type:application/json"
   $ GET /api/users
   $ GET /api/events
-  $ POST /api/users -d '{"name":"<some username>"}'
+  $ POST /api/users -d '{"username":"<some username>"}'
   $ GET /api/users/<some user uuid>
   $ DELETE /api/users/<some user uuid>
   $ POST /api/events -d '{"name":"<some event name>", "owner_id": "<user uuid>"}'
@@ -62,6 +76,51 @@ Just a summary of what is happening above:
 - At this point normal HTTP methods are available in all caps: GET, POST, etc
   at passed resource relative to the global resty URL target
 - Data is passed to curl using -d, and jibely.com is expecting json
+
+Knowing What to Pass in POSTs
+-----------------------------
+
+You can find the columns that are needed for proper posting in the follwing
+directory::
+
+  faro_api/models
+
+All of the models within there can be posted to except the Base model. Anything
+that has a sa.Column is a thing that can be posted to. For example (this may
+be an outdated version of user.py, but the example is fine):
+
+  class User(db.model()):
+      id = sa.Column(sa.Unicode, primary_key=True)
+      username = sa.Column(sa.Unicode, unique=True)
+      first_name = sa.Column(sa.Unicode)
+      last_name = sa.Column(sa.Unicode)
+  
+      def __init__(self, **kwargs):
+          super(User, self).__init__(**kwargs)
+          self.id = unicode(utils.make_uuid())
+  
+      @staticmethod
+      def read_only_columns():
+          return ['username']
+  
+      @staticmethod
+      def query_columns():
+          return ['first_name',
+                  'last_name',
+                  'date_created'] 
+
+Defines a couple things:
+
+  - There are four columns available to post to: id, username, first_name, and
+    last_name
+  - One of the columns needs to be unique (username)
+  - One column is readonly (username)
+  - You can query off 3 columns (first_name, last_name, date_created)
+  - btw, everything has a date_created column (from the Base)
+
+Using resty you can create a user like this::
+
+  $ POST /api/users -d '{"username": "bobbeh", "first_name": "bob"}'
 
 Expected and known issues
 -------------------------

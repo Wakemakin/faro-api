@@ -6,7 +6,7 @@ import faro_api.utils as utils
 
 class User(db.model()):
     id = sa.Column(sa.Unicode, primary_key=True)
-    username = sa.Column(sa.Unicode, unique=True)
+    username = sa.Column(sa.Unicode, unique=True, nullable=False)
     first_name = sa.Column(sa.Unicode)
     last_name = sa.Column(sa.Unicode)
 
