@@ -47,6 +47,8 @@ checks based on:
   - PEP8
   - OpenStack standards
 
+These tests should be run automatically by CI.
+
 To use Alpha 3
 --------------
 
