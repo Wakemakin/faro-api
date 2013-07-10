@@ -4,11 +4,21 @@ import urllib
 import urlparse
 
 import sqlalchemy as sa
+import sqlalchemy.engine
 import sqlalchemy.ext.declarative as decl
 import sqlalchemy.orm as orm
+import sqlite3
 
 from faro_api.exceptions import common as exc
 from faro_api import utils as utils
+
+
+@sa.event.listens_for(sqlalchemy.engine.Engine, "connect")
+def _set_sqlite_pragma(dbapi_connection, connection_record):
+    if isinstance(dbapi_connection, sqlite3.Connection):
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON;")
+        cursor.close()
 
 
 logger = logging.getLogger("faro_api."+__name__)
