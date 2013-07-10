@@ -50,7 +50,7 @@ checks based on:
 To use Alpha 3
 --------------
 
-Using Alpha 1 isn't meant to be simple or nice, but it is meant to teach you
+Using Alpha 3 isn't meant to be simple or nice, but it is meant to teach you
 the basic pattern of things.
 
 On a linux type machine with git perform the following steps::
