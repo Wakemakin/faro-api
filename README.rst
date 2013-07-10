@@ -18,7 +18,7 @@ It has support for the following resources:
 Deploying Alpha 3
 -----------------
 
-On a linux type machine with git, **curl**, and virtualenv perform the following
+On a linux type machine with git and virtualenv perform the following
 steps::
 
   $ git clone https://github.com/Wakemakin/faro-api.git
@@ -48,15 +48,13 @@ checks based on:
   - PEP8
   - OpenStack standards
 
-
-
 To use Alpha 3
 --------------
 
 Using Alpha 3 isn't meant to be simple or nice, but it is meant to teach you
 the basic pattern of things.
 
-On a linux type machine with git perform the following steps::
+On a linux type machine with git and **curl**,perform the following steps::
 
   $ git clone https://github.com/micha/resty.git
   $ source resty/resty
