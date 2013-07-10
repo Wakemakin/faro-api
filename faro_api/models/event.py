@@ -1,24 +1,24 @@
-from sqlalchemy import Column, Boolean, Unicode, ForeignKey
-from sqlalchemy.orm import relationship, backref
+import sqlalchemy as sa
+import sqlalchemy.orm as orm
 
 import faro_api.database as db
-from faro_api.utils import make_uuid
+import faro_api.utils as utils
 
 
 class Event(db.model()):
-    id = Column(Unicode, primary_key=True)
-    name = Column(Unicode, nullable=False)
-    description = Column(Unicode, nullable=True)
-    is_template = Column(Boolean, default=False)
-    parent_id = Column(Unicode, ForeignKey('events.id'))
-    children = relationship('Event',
-                            backref=backref('parent', remote_side=[id]))
-    owner_id = Column(Unicode, ForeignKey('users.id'), nullable=False)
-    owner = relationship('User', backref=backref('events'))
+    id = sa.Column(sa.Unicode, primary_key=True)
+    name = sa.Column(sa.Unicode, nullable=False)
+    description = sa.Column(sa.Unicode, nullable=True)
+    is_template = sa.Column(sa.Boolean, default=False)
+    parent_id = sa.Column(sa.Unicode, sa.ForeignKey('events.id'))
+    backref = orm.backref('parent', remote_side=[id])
+    children = orm.relationship('Event', backref=backref)
+    owner_id = sa.Column(sa.Unicode, sa.ForeignKey('users.id'), nullable=False)
+    owner = orm.relationship('User', backref=orm.backref('events'))
 
     def __init__(self, **kwargs):
         super(Event, self).__init__(**kwargs)
-        self.id = unicode(make_uuid())
+        self.id = unicode(utils.make_uuid())
 
     @staticmethod
     def query_columns():

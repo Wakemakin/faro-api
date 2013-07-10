@@ -1,18 +1,18 @@
-from sqlalchemy import Column, Unicode
+import sqlalchemy as sa
 
 import faro_api.database as db
-from faro_api.utils import make_uuid
+import faro_api.utils as utils
 
 
 class User(db.model()):
-    id = Column(Unicode, primary_key=True)
-    username = Column(Unicode, unique=True)
-    first_name = Column(Unicode)
-    last_name = Column(Unicode)
+    id = sa.Column(sa.Unicode, primary_key=True)
+    username = sa.Column(sa.Unicode, unique=True)
+    first_name = sa.Column(sa.Unicode)
+    last_name = sa.Column(sa.Unicode)
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
-        self.id = unicode(make_uuid())
+        self.id = unicode(utils.make_uuid())
 
     @staticmethod
     def read_only_columns():
