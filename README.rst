@@ -48,7 +48,8 @@ checks based on:
 * PEP8
 * OpenStack standards
 
-These tests should autmatically run on the CI when pushed.
+These tests should autmatically run on the CI when pushed if things are working
+correctly.
 
 To use Alpha 3
 --------------
