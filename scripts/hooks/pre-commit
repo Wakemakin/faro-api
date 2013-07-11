@@ -1,0 +1,24 @@
+#!/bin/sh
+
+if [ "$(git symbolic-ref HEAD 2>/dev/null)" == "refs/heads/master" ]; then
+    echo "Sorry bro, you can't commit directly to master!"
+    echo
+    echo "Instead, you should mess around in different branch and then "
+    echo "fast-forward merge your changes to master."
+    echo
+    echo "  git checkout -b feature_xxx"
+    echo "  ... bunch of changes and commits"
+    echo
+    echo "Remember! Before you merge to master it's a good idea to send"
+    echo "a pull request first! Merge your stuff only when it gets"
+    echo "approved by the team:"
+    echo
+    echo "  git pull origin master && git rebase master"
+    echo "  git checkout master"
+    echo "  git merge feature_xxx"
+    echo
+    echo "Don't be mad, being a little more cautious is better than being"
+    echo "ashamed of broken build."
+
+    exit 1
+fi

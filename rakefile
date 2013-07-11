@@ -1,0 +1,7 @@
+desc "Initializes all necessary things in the project"
+task :init => [ :install_git_hooks ]
+
+desc "Installs custom git hooks"
+task :install_git_hooks do
+    system "cp ./scripts/hooks/* ./.git/hooks/"
+end
