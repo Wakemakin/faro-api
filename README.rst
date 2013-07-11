@@ -49,7 +49,7 @@ checks based on:
 * OpenStack standards
 
 These tests should autmatically run on the CI when pushed if things are working
-correctly. Please work.
+correctly.
 
 To use Alpha 3
 --------------
