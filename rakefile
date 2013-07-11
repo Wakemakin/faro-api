@@ -1,7 +1,13 @@
 desc "Initializes all necessary things in the project"
 task :init => [ :install_git_hooks ]
+task :makevenv => [ :make_virtual_environment ]
 
 desc "Installs custom git hooks"
 task :install_git_hooks do
     system "cp ./scripts/hooks/* ./.git/hooks/"
+end
+
+desc "Creates a virtual environment"
+task :make_virtual_environment do
+    system "virtualenv --prompt='(venv)' --distribute --no-site-packages .venv"
 end
