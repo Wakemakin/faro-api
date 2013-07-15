@@ -3,6 +3,7 @@ import re
 import uuid
 
 import flask
+import flask.ext.jsonpify as jsonp
 import werkzeug.exceptions as http
 
 from faro_api.exceptions import common as exc
@@ -62,10 +63,10 @@ def is_uuid(uuid_str):
 def make_json_app(app, **kwargs):
     def make_json_error(ex):
         if hasattr(ex, "information"):
-            response = flask.jsonify(message=str(ex),
+            response = jsonp.jsonify(message=str(ex),
                                      information=ex.information)
         else:
-            response = flask.jsonify(message=str(ex))
+            response = jsonp.jsonify(message=str(ex))
         response.status_code = (ex.code
                                 if isinstance(ex, http.HTTPException)
                                 else 500)
