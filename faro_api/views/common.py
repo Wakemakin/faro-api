@@ -1,6 +1,7 @@
 import logging
 
 import flask
+import flask.ext.jsonpify as jsonp
 import flask.views as views
 import sqlalchemy.orm.exc as sa_exc
 
@@ -36,11 +37,11 @@ class BaseApi(views.MethodView):
             if results is not None:
                 for result in results:
                     res.append(result.to_dict(**kwargs))
-            return flask.jsonify(objects=res, **output), 200, {}
+            return jsonp.jsonify(objects=res, **output), 200, {}
         try:
             result = db.get_one(session, self.base_resource, id,
                                 self.alternate_key)
-            return flask.jsonify(object=result.to_dict(**kwargs)), 200, {}
+            return jsonp.jsonify(object=result.to_dict(**kwargs)), 200, {}
         except sa_exc.NoResultFound:
             raise exc.NotFound()
 
@@ -60,7 +61,7 @@ class BaseApi(views.MethodView):
                 kwargs.pop("attachments")
             session.add(result)
             session.commit()
-            return flask.jsonify(result.to_dict(**kwargs)), 201, {}
+            return jsonp.jsonify(result.to_dict(**kwargs)), 201, {}
         except TypeError as e:
             logger.error(e)
             session.rollback()
@@ -83,7 +84,7 @@ class BaseApi(views.MethodView):
                 kwargs.pop("attachments")
             result.update(**data)
             session.commit()
-            return flask.jsonify(result.to_dict(**kwargs)), 200, {}
+            return jsonp.jsonify(result.to_dict(**kwargs)), 200, {}
         except sa_exc.NoResultFound:
             raise exc.NotFound()
 
