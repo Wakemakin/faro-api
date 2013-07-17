@@ -22,6 +22,7 @@ class BaseApi(views.MethodView):
     def _configure_endpoint(self):
         pass
 
+    @utils.crossdomain(origin='*')
     def get(self, id, **kwargs):
         session = flask.g.session
         filters = flask.request.args
@@ -46,6 +47,7 @@ class BaseApi(views.MethodView):
             raise exc.NotFound()
 
     @utils.require_body
+    @utils.crossdomain(origin='*')
     def post(self, **kwargs):
         session = flask.g.session
         data = utils.json_request_data(flask.request.data)
@@ -68,6 +70,7 @@ class BaseApi(views.MethodView):
             raise exc.InvalidInput
 
     @utils.require_body
+    @utils.crossdomain(origin='*')
     def put(self, id, **kwargs):
         session = flask.g.session
         data = utils.json_request_data(flask.request.data)
@@ -88,6 +91,7 @@ class BaseApi(views.MethodView):
         except sa_exc.NoResultFound:
             raise exc.NotFound()
 
+    @utils.crossdomain(origin='*')
     def delete(self, id):
         session = flask.g.session
         try:
