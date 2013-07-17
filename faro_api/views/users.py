@@ -6,9 +6,9 @@ import sqlalchemy.orm.exc
 
 from faro_api import database as db
 from faro_api.exceptions import common as exc
-from faro_api.models.event import Event
-from faro_api.models.user import User
-from faro_api.views.common import BaseApi
+from faro_api.models import event as event_model
+from faro_api.models import user as user_model
+from faro_api.views import common
 
 logger = logging.getLogger('faro_api.'+__name__)
 
@@ -18,10 +18,10 @@ class UniqueUsernameRequired(exc.FaroException):
     information = "Username must be unique"
 
 
-class UserApi(BaseApi):
+class UserApi(common.BaseApi):
     def __init__(self):
         super(UserApi, self).__init__()
-        self.base_resource = User
+        self.base_resource = user_model.User
         self.alternate_key = "username"
 
     def _configure_endpoint(self):
@@ -47,7 +47,7 @@ class UserApi(BaseApi):
         session = flask.g.session
         if eventid is not None:
             try:
-                event = db.get_one(session, Event, eventid)
+                event = db.get_one(session, event_model.Event, eventid)
                 return super(UserApi, self).get(event.owner_id,
                                                 with_events=True)
             except sqlalchemy.orm.exc.NoResultFound:

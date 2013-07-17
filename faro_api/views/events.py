@@ -9,7 +9,7 @@ from faro_api.exceptions import common as exc
 from faro_api.models import event as event_model
 from faro_api.models import user as user_model
 from faro_api import utils
-from faro_api.views.common import BaseApi
+from faro_api.views import common
 
 logger = logging.getLogger('faro_api.'+__name__)
 
@@ -24,7 +24,7 @@ class EventNameRequired(exc.FaroException):
     information = "Event name required"
 
 
-class EventApi(BaseApi):
+class EventApi(common.BaseApi):
     def __init__(self):
         super(EventApi, self).__init__()
         self.base_resource = event_model.Event

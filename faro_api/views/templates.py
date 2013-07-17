@@ -9,12 +9,12 @@ from faro_api.exceptions import common as exc
 from faro_api.models import template as template_model
 from faro_api.models import user as user_model
 from faro_api import utils
-from faro_api.views.common import BaseApi
+from faro_api.views import common
 
 logger = logging.getLogger('faro_api.'+__name__)
 
 
-class TemplateApi(BaseApi):
+class TemplateApi(common.BaseApi):
     def __init__(self):
         super(TemplateApi, self).__init__()
         self.base_resource = template_model.Template
