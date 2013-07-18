@@ -30,17 +30,17 @@ class UserApi(common.BaseApi):
         user_view = self.as_view('user_api')
         mod.add_url_rule('/api/users',
                          defaults={'id': None, 'eventid': None},
-                         view_func=user_view, methods=['GET'])
+                         view_func=user_view, methods=['GET', 'OPTIONS'])
         mod.add_url_rule('/api/users',
-                         view_func=user_view, methods=['POST'])
+                         view_func=user_view, methods=['POST', 'OPTIONS'])
         mod.add_url_rule('/api/users/<id>', view_func=user_view,
                          defaults={'eventid': None},
-                         methods=['GET'])
+                         methods=['GET', 'OPTIONS'])
         mod.add_url_rule('/api/users/<id>', view_func=user_view,
-                         methods=['DELETE', 'PUT'])
+                         methods=['DELETE', 'PUT', 'OPTIONS'])
         mod.add_url_rule('/api/events/<string:eventid>/owner',
                          defaults={'id': None},
-                         methods=['GET'], view_func=user_view)
+                         methods=['GET', 'OPTIONS'], view_func=user_view)
         self.blueprint = mod
 
     def get(self, id, eventid, **kwargs):

@@ -4,10 +4,14 @@ import faro_api.database as db
 import faro_api.utils as utils
 
 
+class MyFlask(flask.Flask):
+    pass
+
+
 @utils.static_var("instance", None)
 def app(testing=False):
     if testing or app.instance is None:
-        app.instance = utils.make_json_app(flask.Flask(__name__))
+        app.instance = utils.make_json_app(MyFlask(__name__))
         config = 'apiconfig.DevelopmentConfig'
         if testing:
             config = 'apiconfig.TestConfig'

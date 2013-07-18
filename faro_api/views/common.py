@@ -23,6 +23,10 @@ class BaseApi(views.MethodView):
         pass
 
     @utils.crossdomain(origin='*')
+    def options(self, id, eventid):
+        return flask.current_app.make_default_options_response()
+
+    @utils.crossdomain(origin='*')
     def get(self, id, **kwargs):
         session = flask.g.session
         filters = flask.request.args
