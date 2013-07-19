@@ -3,3 +3,4 @@ sqlalchemy
 python-dateutil>=2.0
 flask-sqlalchemy
 flask-jsonpify
+gunicorn
