@@ -37,3 +37,4 @@ nosetests.xml
 .venv
 resty
 faro.db
+logs
