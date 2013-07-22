@@ -1,9 +1,7 @@
 .venv
 README.rst
 apiconfig.py
-faro.db
 faro_api
-logs
 pip-requirements.txt
 rakefile
 run.py
