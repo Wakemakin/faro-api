@@ -1,7 +1,6 @@
 .venv
 README.rst
 apiconfig.py
-apiconfig.pyc
 faro.db
 faro_api
 logs
