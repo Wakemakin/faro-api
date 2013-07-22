@@ -1,0 +1,17 @@
+.venv
+README.rst
+apiconfig.py
+apiconfig.pyc
+faro.db
+faro_api
+logs
+pip-requirements.txt
+rakefile
+run.py
+scripts
+service-setup.sh
+service-start.sh
+setup.cfg
+setup.py
+test-requirements.txt
+tox.ini
