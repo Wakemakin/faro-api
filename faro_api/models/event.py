@@ -14,7 +14,8 @@ class Event(db.model()):
     backref = orm.backref('parent', remote_side=[id])
     children = orm.relationship('Event', backref=backref)
     owner_id = sa.Column(sa.Unicode, sa.ForeignKey('users.id'), nullable=False)
-    owner = orm.relationship('User', backref=orm.backref('events'))
+    backref = orm.backref('events', cascade='all,delete')
+    owner = orm.relationship('User', backref=backref)
 
     def __init__(self, **kwargs):
         super(Event, self).__init__(**kwargs)

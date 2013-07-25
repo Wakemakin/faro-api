@@ -28,7 +28,7 @@ class EventAndUserTest(unittest.TestCase):
         rv = self.create_user(username)
         rv = self.client.post('/api/events', data=json.dumps(
                               {'name': 'test',
-                              'owner_id': username}
+                                  'owner_id': username}
                               ), follow_redirects=True)
         return rv
 
@@ -39,7 +39,7 @@ class EventAndUserTest(unittest.TestCase):
         user_id = res['id']
         rv = self.client.post('/api/events', data=json.dumps(
                               {'name': 'test',
-                              'owner_id': user_id}
+                                  'owner_id': user_id}
                               ), follow_redirects=True)
         res = json.loads(rv.data)
         assert 'owner' in res
@@ -54,7 +54,7 @@ class EventAndUserTest(unittest.TestCase):
         assert rv.status_code == 201
         rv = self.client.post('/api/events', data=json.dumps(
                               {'name': 'test',
-                              'owner_id': 'test_user'}
+                                  'owner_id': 'test_user'}
                               ), follow_redirects=True)
         res = json.loads(rv.data)
         assert 'owner' in res
@@ -100,7 +100,7 @@ class EventAndUserTest(unittest.TestCase):
         assert rv.status_code == 201
         rv = self.client.post('/api/users/test_user/events',
                               data=json.dumps(
-                              {'name': 'test'}),
+                                  {'name': 'test'}),
                               follow_redirects=True)
         res = json.loads(rv.data)
         assert rv.status_code == 201
@@ -156,13 +156,32 @@ class EventAndUserTest(unittest.TestCase):
     def test_error_create_event_bad_user_name(self):
         rv = self.client.post('/api/events', data=json.dumps(
                               {'name': 'test',
-                              'owner_id': 'test_user'}
+                                  'owner_id': 'test_user'}
                               ), follow_redirects=True)
         assert rv.status_code == 404
 
     def test_error_create_event_bad_user_id(self):
         rv = self.client.post('/api/events', data=json.dumps(
                               {'name': 'test',
-                              'owner_id': str(utils.make_uuid())}
+                                  'owner_id': str(utils.make_uuid())}
                               ), follow_redirects=True)
         assert rv.status_code == 404
+
+    def test_regression_delete_user_with_event_fail(self):
+        rv = self.create_event_with_user('test_user', 'event')
+        assert rv.status_code == 201
+        rv = self.client.delete('/api/users/test_user',
+                                follow_redirects=True)
+        assert rv.status_code == 204
+
+    def test_regression_delete_user_with_event_fail_delete_event(self):
+        rv = self.create_event_with_user('test_user', 'event')
+        assert rv.status_code == 201
+        res = json.loads(rv.data)
+        event_id = res['id']
+        rv = self.client.delete('/api/events/%s' % event_id,
+                                follow_redirects=True)
+        assert rv.status_code == 204
+        rv = self.client.delete('/api/users/test_user',
+                                follow_redirects=True)
+        assert rv.status_code == 204
