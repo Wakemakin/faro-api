@@ -19,24 +19,24 @@ class UserTest(unittest.TestCase):
         del os
 
     def create_user(self, name):
-        return self.client.post('/api/users', data=json.dumps(
+        return self.client.post('/users', data=json.dumps(
                                 {'username': name}
                                 ), follow_redirects=True)
 
     def test_ensure_jsonp_wraps(self):
-        rv = self.client.get('/api/users?callback=foo')
+        rv = self.client.get('/users?callback=foo')
         assert 'foo(' in rv.data
         assert '});' in rv.data
         mod_data = rv.data.replace('foo(', '')
         mod_data = mod_data.replace(');', '')
-        rv = self.client.get('/api/users')
+        rv = self.client.get('/users')
         assert rv.data == mod_data
         res = json.loads(mod_data)
         assert res['objects'] == []
         assert rv.status_code == 200
 
     def test_ensure_jsonp_uses_callback(self):
-        rv = self.client.get('/api/users?callback=foo')
+        rv = self.client.get('/users?callback=foo')
         assert 'foo(' in rv.data
-        rv = self.client.get('/api/users?callback=bar')
+        rv = self.client.get('/users?callback=bar')
         assert 'bar(' in rv.data
