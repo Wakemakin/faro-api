@@ -20,26 +20,26 @@ class EventTest(unittest.TestCase):
         del os
 
     def create_user(self, name):
-        return self.client.post('/api/users', data=json.dumps(
+        return self.client.post('/users', data=json.dumps(
                                 {'username': name}
                                 ), follow_redirects=True)
 
     def create_event_with_user(self, name, username='test_user'):
         self.create_user(username)
-        return self.client.post('/api/events', data=json.dumps(
+        return self.client.post('/events', data=json.dumps(
                                 {'name': name,
-                                'owner_id': username}
+                                 'owner_id': username}
                                 ), follow_redirects=True)
 
     def test_get_empty_events(self):
-        rv = self.client.get('/api/events')
+        rv = self.client.get('/events')
         res = json.loads(rv.data)
         assert res['objects'] == []
         assert rv.status_code == 200
 
     def test_get_one_event(self):
         rv = self.create_event_with_user("test")
-        rv = self.client.get('/api/events')
+        rv = self.client.get('/events')
         res = json.loads(rv.data)
         assert len(res['objects']) == 1
 
@@ -47,7 +47,7 @@ class EventTest(unittest.TestCase):
         rv = self.create_event_with_user("test")
         res = json.loads(rv.data)
         id = res['id']
-        rv = self.client.get('/api/events/' + id)
+        rv = self.client.get('/events/' + id)
         res = json.loads(rv.data)
         assert res['object']['name'] == 'test'
         assert res['object']['id'] == id
@@ -55,15 +55,15 @@ class EventTest(unittest.TestCase):
     def test_get_multi_user(self):
         rv = self.create_event_with_user("test1")
         rv = self.create_event_with_user("test2")
-        rv = self.client.get('/api/events')
+        rv = self.client.get('/events')
         res = json.loads(rv.data)
         assert len(res['objects']) == 2
 
     def test_post_event_just_name(self):
         rv = self.create_user('test_user')
-        rv = self.client.post('/api/events', data=json.dumps(
+        rv = self.client.post('/events', data=json.dumps(
                               {'name': 'test',
-                              'owner_id': 'test_user'}
+                               'owner_id': 'test_user'}
                               ), follow_redirects=True)
         res = json.loads(rv.data)
         assert res['name'] == 'test'
@@ -73,10 +73,10 @@ class EventTest(unittest.TestCase):
 
     def test_post_event(self):
         rv = self.create_user('test_user')
-        rv = self.client.post('/api/events', data=json.dumps(
+        rv = self.client.post('/events', data=json.dumps(
                               {'name': 'test',
-                              'description': 'derp',
-                              'owner_id': 'test_user'}
+                               'description': 'derp',
+                               'owner_id': 'test_user'}
                               ), follow_redirects=True)
         res = json.loads(rv.data)
         assert res['name'] == 'test'
@@ -87,11 +87,11 @@ class EventTest(unittest.TestCase):
     def test_post_event_with_id(self):
         """Should this test fail?"""
         rv = self.create_user('test_user')
-        rv = self.client.post('/api/events', data=json.dumps(
+        rv = self.client.post('/events', data=json.dumps(
                               {'name': 'test',
-                              'id': 'test-id',
-                              'description': 'derp',
-                              'owner_id': 'test_user'}
+                               'id': 'test-id',
+                               'description': 'derp',
+                               'owner_id': 'test_user'}
                               ), follow_redirects=True)
         assert rv.status_code == 201
 
@@ -100,7 +100,7 @@ class EventTest(unittest.TestCase):
         res = json.loads(rv.data)
         id = res['id']
         assert res['name'] == 'test_event'
-        rv = self.client.put('/api/events/'+id, data=json.dumps(
+        rv = self.client.put('/events/'+id, data=json.dumps(
                              {'name': 'test'}
                              ), follow_redirects=True)
         res = json.loads(rv.data)
@@ -112,7 +112,7 @@ class EventTest(unittest.TestCase):
         res = json.loads(rv.data)
         id = res['id']
         assert res['description'] is None
-        rv = self.client.put('/api/events/'+id, data=json.dumps(
+        rv = self.client.put('/events/'+id, data=json.dumps(
                              {'description': 'test'}
                              ), follow_redirects=True)
         res = json.loads(rv.data)
@@ -122,11 +122,11 @@ class EventTest(unittest.TestCase):
     def test_filter_event_by_owner(self):
         rv = self.create_event_with_user("test", "derp")
         rv = self.create_event_with_user("test2", "herp")
-        rv = self.client.get('/api/events')
+        rv = self.client.get('/events')
         res = json.loads(rv.data)
         assert len(res['objects']) == 2
         assert rv.status_code == 200
-        rv = self.client.get('/api/events?owner_id=derp')
+        rv = self.client.get('/events?owner_id=derp')
         res = json.loads(rv.data)
         assert len(res['objects']) == 1
         assert rv.status_code == 200
@@ -134,11 +134,11 @@ class EventTest(unittest.TestCase):
     def test_filter_event_by_name(self):
         rv = self.create_event_with_user("test", "asdf")
         rv = self.create_event_with_user("derp", "asdf2")
-        rv = self.client.get('/api/events')
+        rv = self.client.get('/events')
         res = json.loads(rv.data)
         assert len(res['objects']) == 2
         assert rv.status_code == 200
-        rv = self.client.get('/api/events?name=derp')
+        rv = self.client.get('/events?name=derp')
         res = json.loads(rv.data)
         assert len(res['objects']) == 1
         assert rv.status_code == 200
@@ -147,25 +147,25 @@ class EventTest(unittest.TestCase):
         rv = self.create_event_with_user("test")
         res = json.loads(rv.data)
         id = res['id']
-        rv = self.client.delete('/api/events/'+id, follow_redirects=True)
+        rv = self.client.delete('/events/'+id, follow_redirects=True)
         assert rv.status_code == 204
 
     def test_error_get_one_event_by_fail_id(self):
         id = str(utils.make_uuid())
-        rv = self.client.get('/api/events/'+id)
+        rv = self.client.get('/events/'+id)
         assert rv.status_code == 404
 
     def test_error_post_event_empty_body(self):
-        rv = self.client.post('/api/events', data=json.dumps(
+        rv = self.client.post('/events', data=json.dumps(
                               {}
                               ), follow_redirects=True)
         assert rv.status_code == 400
 
     def test_error_post_event_no_name(self):
         rv = self.create_user('test_user')
-        rv = self.client.post('/api/events', data=json.dumps(
+        rv = self.client.post('/events', data=json.dumps(
                               {'description': 'herps and derps',
-                              'owner_id': 'test_user'}
+                               'owner_id': 'test_user'}
                               ), follow_redirects=True)
         assert rv.status_code == 409
 
@@ -173,21 +173,21 @@ class EventTest(unittest.TestCase):
         rv = self.create_user('test_user')
         rv = self.create_event_with_user("test")
         id = json.loads(rv.data)['id']
-        rv = self.client.post('/api/events/'+id, data=json.dumps(
+        rv = self.client.post('/events/'+id, data=json.dumps(
                               {'name': 'test',
-                              'owner_id': 'test_user'}
+                               'owner_id': 'test_user'}
                               ), follow_redirects=True)
         assert rv.status_code == 405
 
     def test_error_put_event_with_id(self):
         rv = self.create_event_with_user("test")
         id = json.loads(rv.data)['id']
-        rv = self.client.put('/api/events/'+id, data=json.dumps(
+        rv = self.client.put('/events/'+id, data=json.dumps(
                              {'id': 'test'}
                              ), follow_redirects=True)
         assert rv.status_code == 403
 
     def test_error_delete_fail_event(self):
         id = str(utils.make_uuid())
-        rv = self.client.delete('/api/events/'+id)
+        rv = self.client.delete('/events/'+id)
         assert rv.status_code == 404

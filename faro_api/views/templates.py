@@ -23,19 +23,19 @@ class TemplateApi(common.BaseApi):
         mod = flask.Blueprint('templates', __name__)
 
         template_view = self.as_view('template_api')
-        mod.add_url_rule('/api/templates', defaults={'userid': None},
+        mod.add_url_rule('/templates', defaults={'userid': None},
                          view_func=template_view, methods=['POST'])
-        mod.add_url_rule('/api/users/<string:userid>/templates',
+        mod.add_url_rule('/users/<string:userid>/templates',
                          view_func=template_view, methods=['POST'])
 
-        mod.add_url_rule('/api/users/<string:userid>/templates',
+        mod.add_url_rule('/users/<string:userid>/templates',
                          defaults={'id': None},
                          view_func=template_view, methods=['GET'])
-        mod.add_url_rule('/api/templates', defaults={'id': None,
+        mod.add_url_rule('/templates', defaults={'id': None,
                          'userid': None},
                          view_func=template_view, methods=['GET'])
 
-        mod.add_url_rule('/api/templates/<id>', view_func=template_view,
+        mod.add_url_rule('/templates/<id>', view_func=template_view,
                          methods=['GET', 'DELETE', 'PUT'],
                          defaults={'userid': None})
         self.blueprint = mod
