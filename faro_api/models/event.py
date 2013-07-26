@@ -6,14 +6,15 @@ import faro_api.utils as utils
 
 
 class Event(db.model()):
-    id = sa.Column(sa.Unicode, primary_key=True)
-    name = sa.Column(sa.Unicode, nullable=False)
-    description = sa.Column(sa.Unicode, nullable=True)
+    id = sa.Column(sa.Unicode(36), primary_key=True)
+    name = sa.Column(sa.Unicode(32), nullable=False)
+    description = sa.Column(sa.Unicode(128), nullable=True)
     is_template = sa.Column(sa.Boolean, default=False)
-    parent_id = sa.Column(sa.Unicode, sa.ForeignKey('events.id'))
+    parent_id = sa.Column(sa.Unicode(36), sa.ForeignKey('events.id'))
     backref = orm.backref('parent', remote_side=[id])
     children = orm.relationship('Event', backref=backref)
-    owner_id = sa.Column(sa.Unicode, sa.ForeignKey('users.id'), nullable=False)
+    owner_id = sa.Column(sa.Unicode(36), sa.ForeignKey('users.id'),
+                         nullable=False)
     backref = orm.backref('events', cascade='all,delete')
     owner = orm.relationship('User', backref=backref)
 

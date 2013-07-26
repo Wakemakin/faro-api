@@ -5,10 +5,10 @@ import faro_api.utils as utils
 
 
 class User(db.model()):
-    id = sa.Column(sa.Unicode, primary_key=True)
-    username = sa.Column(sa.Unicode, unique=True, nullable=False)
-    first_name = sa.Column(sa.Unicode)
-    last_name = sa.Column(sa.Unicode)
+    id = sa.Column(sa.Unicode(36), primary_key=True)
+    username = sa.Column(sa.Unicode(32), unique=True, nullable=False)
+    first_name = sa.Column(sa.Unicode(32))
+    last_name = sa.Column(sa.Unicode(32))
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
