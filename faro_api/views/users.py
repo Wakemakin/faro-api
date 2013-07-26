@@ -28,17 +28,17 @@ class UserApi(common.BaseApi):
         mod = flask.Blueprint('users', __name__)
 
         user_view = self.as_view('user_api')
-        mod.add_url_rule('/api/users',
+        mod.add_url_rule('/users',
                          defaults={'id': None, 'eventid': None},
                          view_func=user_view, methods=['GET', 'OPTIONS'])
-        mod.add_url_rule('/api/users',
+        mod.add_url_rule('/users',
                          view_func=user_view, methods=['POST', 'OPTIONS'])
-        mod.add_url_rule('/api/users/<id>', view_func=user_view,
+        mod.add_url_rule('/users/<id>', view_func=user_view,
                          defaults={'eventid': None},
                          methods=['GET', 'OPTIONS'])
-        mod.add_url_rule('/api/users/<id>', view_func=user_view,
+        mod.add_url_rule('/users/<id>', view_func=user_view,
                          methods=['DELETE', 'PUT', 'OPTIONS'])
-        mod.add_url_rule('/api/events/<string:eventid>/owner',
+        mod.add_url_rule('/events/<string:eventid>/owner',
                          defaults={'id': None},
                          methods=['GET', 'OPTIONS'], view_func=user_view)
         self.blueprint = mod

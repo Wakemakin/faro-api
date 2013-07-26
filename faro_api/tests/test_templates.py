@@ -19,17 +19,17 @@ class TemplateTest(unittest.TestCase):
         del os
 
     def create_user(self, name):
-        return self.client.post('/api/users', data=json.dumps(
+        return self.client.post('/users', data=json.dumps(
                                 {'username': name}
                                 ), follow_redirects=True)
 
     def create_template(self, title, type):
-        return self.client.post('/api/templates', data=json.dumps(
+        return self.client.post('/templates', data=json.dumps(
                                 {'title': title, 'template_type': type}
                                 ), follow_redirects=True)
 
     def test_get_empty_templates(self):
-        rv = self.client.get('/api/templates')
+        rv = self.client.get('/templates')
         res = json.loads(rv.data)
         assert res['objects'] == []
         assert rv.status_code == 200
@@ -37,26 +37,25 @@ class TemplateTest(unittest.TestCase):
     def test_get_multiple_templates(self):
         self.create_template('test', 'list')
         self.create_template('test', 'list')
-        rv = self.client.get('/api/templates')
+        rv = self.client.get('/templates')
         res = json.loads(rv.data)
         assert len(res['objects']) == 2
         assert rv.status_code == 200
 
     def test_get_template_under_owner(self):
         rv = self.create_user('test_user')
-        rv = self.client.post('/api/users/test_user/templates',
-                              data=json.dumps(
-                              {'title': "title",
-                              'template_type': "list"}
-                              ), follow_redirects=True)
-        rv = self.client.get('/api/users/test_user/templates',
+        rv = self.client.post('/users/test_user/templates',
+                              data=json.dumps({'title': "title",
+                                               'template_type': "list"}),
+                              follow_redirects=True)
+        rv = self.client.get('/users/test_user/templates',
                              follow_redirects=True)
         res = json.loads(rv.data)
         assert len(res['objects']) == 1
         assert rv.status_code == 200
 
     def test_create_template_without_owner(self):
-        rv = self.client.post('/api/templates', data=json.dumps(
+        rv = self.client.post('/templates', data=json.dumps(
                               {'title': "title", 'template_type': "list"}
                               ), follow_redirects=True)
         assert rv.status_code == 201
@@ -65,10 +64,10 @@ class TemplateTest(unittest.TestCase):
 
     def test_create_template_with_owner(self):
         rv = self.create_user('test_user')
-        rv = self.client.post('/api/templates', data=json.dumps(
+        rv = self.client.post('/templates', data=json.dumps(
                               {'title': "title",
-                              'owner_id': 'test_user',
-                              'template_type': "list"}
+                               'owner_id': 'test_user',
+                               'template_type': "list"}
                               ), follow_redirects=True)
         assert rv.status_code == 201
         res = json.loads(rv.data)
@@ -78,11 +77,10 @@ class TemplateTest(unittest.TestCase):
 
     def test_create_template_under_owner(self):
         rv = self.create_user('test_user')
-        rv = self.client.post('/api/users/test_user/templates',
-                              data=json.dumps(
-                              {'title': "title",
-                              'template_type': "list"}
-                              ), follow_redirects=True)
+        rv = self.client.post('/users/test_user/templates',
+                              data=json.dumps({'title': "title",
+                                               'template_type': "list"}),
+                              follow_redirects=True)
         assert rv.status_code == 201
         res = json.loads(rv.data)
         assert res['title'] == "title"
@@ -96,10 +94,9 @@ class TemplateTest(unittest.TestCase):
         template_id = res['id']
         assert 'title' in res
         assert res['title'] == 'name'
-        rv = self.client.put('/api/templates/%s' % template_id,
-                             data=json.dumps(
-                             {'title': "new title"}
-                             ), follow_redirects=True)
+        rv = self.client.put('/templates/%s' % template_id,
+                             data=json.dumps({'title': "new title"}),
+                             follow_redirects=True)
         res = json.loads(rv.data)
         assert 'id' in res
         assert res['id'] == template_id
@@ -113,10 +110,9 @@ class TemplateTest(unittest.TestCase):
         template_id = res['id']
         assert 'description' in res
         assert res['description'] is None
-        rv = self.client.put('/api/templates/%s' % template_id,
-                             data=json.dumps(
-                             {'description': "desc"}
-                             ), follow_redirects=True)
+        rv = self.client.put('/templates/%s' % template_id,
+                             data=json.dumps({'description': "desc"}),
+                             follow_redirects=True)
         res = json.loads(rv.data)
         assert 'id' in res
         assert res['id'] == template_id
@@ -124,32 +120,30 @@ class TemplateTest(unittest.TestCase):
         assert res['description'] == 'desc'
 
     def test_error_create_template_without_title(self):
-        rv = self.client.post('/api/templates', data=json.dumps(
+        rv = self.client.post('/templates', data=json.dumps(
                               {'template_type': "list"}
                               ), follow_redirects=True)
         assert rv.status_code == 400
 
     def test_error_create_template_without_type(self):
-        rv = self.client.post('/api/templates', data=json.dumps(
+        rv = self.client.post('/templates', data=json.dumps(
                               {'title': "title"}
                               ), follow_redirects=True)
         assert rv.status_code == 400
 
     def test_error_create_template_under_bad_owner(self):
         rv = self.create_user('test_user')
-        rv = self.client.post('/api/users/herpderp/templates',
-                              data=json.dumps(
-                              {'title': "title",
-                              'template_type': "list"}
-                              ), follow_redirects=True)
+        rv = self.client.post('/users/herpderp/templates',
+                              data=json.dumps({'title': "title",
+                                               'template_type': "list"}),
+                              follow_redirects=True)
         assert rv.status_code == 404
 
     def test_error_create_template_with_bad_owner(self):
         rv = self.create_user('test_user')
-        rv = self.client.post('/api/templates', data=json.dumps(
-                              {'title': "title",
-                              'owner_id': 'hper_derp',
-                              'template_type': "list"}
+        rv = self.client.post('/templates', data=json.dumps(
+                              {'title': "title", 'owner_id': 'hper_derp',
+                               'template_type': "list"}
                               ), follow_redirects=True)
         assert rv.status_code == 404
 
@@ -158,8 +152,7 @@ class TemplateTest(unittest.TestCase):
         res = json.loads(rv.data)
         assert 'id' in res
         template_id = res['id']
-        rv = self.client.put('/api/templates/%s' % template_id,
-                             data=json.dumps(
-                             {'template_type': "desc"}
-                             ), follow_redirects=True)
+        rv = self.client.put('/templates/%s' % template_id,
+                             data=json.dumps({'template_type': "desc"}),
+                             follow_redirects=True)
         assert rv.status_code == 403

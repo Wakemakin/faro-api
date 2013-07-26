@@ -31,12 +31,12 @@ class PageTest(unittest.TestCase):
         del os
 
     def create_user(self, name):
-        return self.client.post('/api/users', data=json.dumps(
+        return self.client.post('/users', data=json.dumps(
                                 {'username': name}
                                 ), follow_redirects=True)
 
     def test_get_no_users_default_max(self):
-        rv = self.client.get('/api/users')
+        rv = self.client.get('/users')
         res = json.loads(rv.data)
         assert len(res['objects']) == 0
         assert res[self.tq] == 0
@@ -49,7 +49,7 @@ class PageTest(unittest.TestCase):
     def test_get_min_users_small_page(self):
         page_size = self.small_page_size
         [self.create_user(str(x)) for x in range(self.total)]
-        rv = self.client.get('/api/users?%s=%s' %
+        rv = self.client.get('/users?%s=%s' %
                              (self.psq, page_size))
         res = json.loads(rv.data)
         assert len(res['objects']) == page_size
@@ -64,7 +64,7 @@ class PageTest(unittest.TestCase):
     def test_get_min_users_medium_page(self):
         page_size = self.medium_page_size
         [self.create_user(str(x)) for x in range(self.total)]
-        rv = self.client.get('/api/users?%s=%s' %
+        rv = self.client.get('/users?%s=%s' %
                              (self.psq, page_size))
         res = json.loads(rv.data)
         assert len(res['objects']) == page_size
@@ -79,7 +79,7 @@ class PageTest(unittest.TestCase):
     def test_get_min_users_large_page(self):
         page_size = self.large_page_size
         [self.create_user(str(x)) for x in range(self.total)]
-        rv = self.client.get('/api/users?%s=%s' %
+        rv = self.client.get('/users?%s=%s' %
                              (self.psq, page_size))
         res = json.loads(rv.data)
         assert len(res['objects']) == page_size
@@ -95,7 +95,7 @@ class PageTest(unittest.TestCase):
         total = self.maximum_page_size * 2
         page_size = total
         [self.create_user(str(x)) for x in range(total)]
-        rv = self.client.get('/api/users?%s=%s' %
+        rv = self.client.get('/users?%s=%s' %
                              (self.psq, page_size))
         res = json.loads(rv.data)
         assert len(res['objects']) == true_page
@@ -111,7 +111,7 @@ class PageTest(unittest.TestCase):
         page_size = 1
         [self.create_user(str(x)) for x in range(self.total)]
         i = 0
-        uri = '/api/users?%s=%s' % (self.psq, page_size)
+        uri = '/users?%s=%s' % (self.psq, page_size)
         while i < self.total:
             rv = self.client.get(uri)
             res = json.loads(rv.data)
