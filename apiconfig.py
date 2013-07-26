@@ -1,4 +1,5 @@
 import os
+import ConfigParser
 
 _basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -22,10 +23,24 @@ class Config(object):
 
 
 class DevelopmentConfig(Config):
-    import os
-    _basedir = os.path.abspath(os.path.dirname(__file__))
-    DATABASE_URI = 'sqlite:///' + os.path.join(_basedir, DATABASE_FILE)
-    del os
+    db_user = 'root'
+    db_password = 'password'
+    db_host = 'localhost'
+    db_name = 'faro_api'
+    try:
+        with open('/etc/faro-api/faro-api.conf'):
+            config = ConfigParser.SafeConfigParser(
+                {'db_user': db_user, 'db_password': db_password,
+                 'db_host': db_host, 'db_name': db_name})
+            config.read('/etc/faro-api/faro-api.conf')
+            db_user = config.get('faro_api', 'db_user')
+            db_password = config.get('faro_api', 'db_password')
+            db_host = config.get('faro_api', 'db_host')
+            db_name = config.get('faro_api', 'db_name')
+    except IOError:
+        pass
+    uri = "mysql://%s:%s@%s/%s" % (db_user, db_password, db_host, db_name)
+    DATABASE_URI = uri
 
 
 class TestConfig(Config):

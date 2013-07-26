@@ -6,11 +6,12 @@ import faro_api.utils as utils
 
 
 class Template(db.model()):
-    id = sa.Column(sa.Unicode, primary_key=True)
-    title = sa.Column(sa.Unicode, nullable=False)
-    template_type = sa.Column(sa.Unicode, nullable=False)
-    description = sa.Column(sa.Unicode, nullable=True)
-    owner_id = sa.Column(sa.Unicode, sa.ForeignKey('users.id'), nullable=True)
+    id = sa.Column(sa.Unicode(36), primary_key=True)
+    title = sa.Column(sa.Unicode(32), nullable=False)
+    template_type = sa.Column(sa.Unicode(32), nullable=False)
+    description = sa.Column(sa.Unicode(128), nullable=True)
+    owner_id = sa.Column(sa.Unicode(36), sa.ForeignKey('users.id'),
+                         nullable=True)
     owner = orm.relationship('User', backref=orm.backref('templates'))
 
     def __init__(self, **kwargs):
