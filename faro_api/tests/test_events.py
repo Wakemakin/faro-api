@@ -52,7 +52,7 @@ class EventTest(unittest.TestCase):
         assert res['object']['name'] == 'test'
         assert res['object']['id'] == id
 
-    def test_get_multi_user(self):
+    def test_get_multi_event(self):
         rv = self.create_event_with_user("test1")
         rv = self.create_event_with_user("test2")
         rv = self.client.get('/events')

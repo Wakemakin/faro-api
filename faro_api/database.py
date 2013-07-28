@@ -44,10 +44,12 @@ def create_db_environment(app):
         db_session.remove()
         db_session.close()
 
+    from faro_api.models import action
     from faro_api.models import event
-    from faro_api.models import template
+    from faro_api.models import item
+    from faro_api.models import question
     from faro_api.models import user
-    [user, event, template]
+    [user, event, item, question, action]
     model().metadata.create_all(bind=engine)
 
     return db_session

@@ -67,7 +67,6 @@ class EventApi(common.BaseApi):
             except sa_exc.NoResultFound:
                 raise exc.NotFound()
             return super(EventApi, self).get(id, with_owner=True)
-        raise exc.NotFound()
 
     def put(self, id, userid):
         session = flask.g.session
