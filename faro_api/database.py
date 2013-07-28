@@ -61,7 +61,7 @@ def get_one(session, cls, filter_value, alternative_check=None):
     elif alternative_check is not None:
         alt_col = getattr(cls, alternative_check)
         return session.query(cls).filter(alt_col == filter_value).one()
-    raise exc.NotFound()
+    raise exc.InvalidInput()
 
 
 def create_filters(query, cls, filter_list, additional_filters):
@@ -111,13 +111,6 @@ def handle_paging(query, filters, total, url):
                                                qs, o.fragment])
                 output['next'] = new_url
         else:
-            if page > 1:
-                qs = urlparse.parse_qsl(o.query)
-                qs.append(('p', page - 1))
-                qs = urllib.urlencode(qs)
-                new_url = urlparse.urlunsplit([o.scheme, o.netloc, o.path,
-                                               qs, o.fragment])
-                output['prev'] = new_url
             if total > page_size and page * page_size < total:
                 qs = urlparse.parse_qsl(o.query)
                 qs.append(('p', page + 1))
@@ -140,15 +133,6 @@ class Base(object):
         return cls.__name__.lower() + "s"
 
     date_created = sa.Column(sa.DateTime, default=sa.func.now())
-
-    def __init__(self, **kwargs):
-        pass
-
-    def to_dict(self):
-        pass
-
-    def read_only_columns(self):
-        return []
 
     def update(self, **kwargs):
         for key, value in kwargs.iteritems():

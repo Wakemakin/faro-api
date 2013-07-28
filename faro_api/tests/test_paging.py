@@ -13,7 +13,7 @@ class PageTest(unittest.TestCase):
         self.app = faro_api.app(testing=True)
         self.client = self.app.test_client()
         self.page_size = self.app.config['DEFAULT_PAGE_SIZE']
-        self.pages = 10
+        self.pages = 5
         self.remainder = self.page_size / 2
 
         self.psq = self.app.config['PAGE_SIZE_QUERY']

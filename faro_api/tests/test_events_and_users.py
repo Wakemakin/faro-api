@@ -128,7 +128,8 @@ class EventAndUserTest(unittest.TestCase):
         assert new_user_id == res['object']['owner']['id']
 
     def test_error_get_owner_of_bad_event(self):
-        rv = self.client.get('/events/%s/owner' % 'derp',
+        id = str(utils.make_uuid())
+        rv = self.client.get('/events/%s/owner' % id,
                              follow_redirects=True)
         assert rv.status_code == 404
 
