@@ -7,12 +7,15 @@ import faro_api.utils as utils
 class User(db.model()):
     id = sa.Column(sa.Unicode(36), primary_key=True)
     username = sa.Column(sa.Unicode(32), unique=True, nullable=False)
+    display_name = sa.Column(sa.Unicode(32), unique=True, nullable=False)
     first_name = sa.Column(sa.Unicode(32))
     last_name = sa.Column(sa.Unicode(32))
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
         self.id = unicode(utils.make_uuid())
+        self.display_name = kwargs['username']
+        self.username = kwargs['username'].lower()
 
     @staticmethod
     def read_only_columns():
@@ -26,6 +29,7 @@ class User(db.model()):
 
     def to_dict(self, with_events=False):
         ret = {'username': self.username,
+               'display_name': self.display_name,
                'id': self.id,
                'first_name': self.first_name,
                'last_name': self.last_name,

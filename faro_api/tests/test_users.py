@@ -270,3 +270,16 @@ class UserTest(unittest.TestCase):
     def test_error_delete_fail_user(self):
         rv = self.client.delete('/users/asfdf', follow_redirects=True)
         assert rv.status_code == 404
+
+    def test_regression_create_user_same_diff_caps(self):
+        rv = self.create_user("roaet")
+        rv = self.create_user("Roaet")
+        assert rv.status_code == 409
+
+    def test_regression_get_user_same_diff_caps(self):
+        rv = self.create_user("roaet")
+        assert rv.status_code == 201
+        rv = self.client.get("/users/roaet")
+        assert rv.status_code == 200
+        rv = self.client.get("/users/Roaet")
+        assert rv.status_code == 200
