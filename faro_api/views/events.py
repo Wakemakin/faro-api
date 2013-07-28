@@ -72,7 +72,7 @@ class EventApi(common.BaseApi):
         session = flask.g.session
         data = utils.json_request_data(flask.request.data)
         if not data:
-            raise exc.BodyRequired()
+            raise exc.RequiresBody()
         with_owner = False
         attachments = None
         if 'owner_id' in data:

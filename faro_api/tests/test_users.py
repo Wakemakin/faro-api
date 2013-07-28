@@ -226,6 +226,13 @@ class UserTest(unittest.TestCase):
                               ), follow_redirects=True)
         assert rv.status_code == 405
 
+    def test_error_put_user_with_empty_data(self):
+        rv = self.create_user("test1")
+        rv = self.client.put('/users/test1', data=json.dumps(
+                             {}
+                             ), follow_redirects=True)
+        assert rv.status_code == 400
+
     def test_error_put_user_with_id(self):
         rv = self.create_user("test1")
         rv = self.client.put('/users/test1', data=json.dumps(
@@ -233,12 +240,32 @@ class UserTest(unittest.TestCase):
                              ), follow_redirects=True)
         assert rv.status_code == 403
 
+    def test_error_put_bad_user(self):
+        rv = self.client.put('/users/test1', data=json.dumps(
+                             {'username': 'test-id'}
+                             ), follow_redirects=True)
+        assert rv.status_code == 404
+
     def test_error_put_user_with_username(self):
         rv = self.create_user("test1")
         rv = self.client.put('/users/test1', data=json.dumps(
                              {'username': 'test-id'}
                              ), follow_redirects=True)
         assert rv.status_code == 403
+
+    def test_error_put_user_weird_column(self):
+        rv = self.create_user("test1")
+        rv = self.client.put('/users/test1', data=json.dumps(
+                             {'bobbeh': 'something'}
+                             ), follow_redirects=True)
+        assert rv.status_code == 400
+
+    def test_error_post_user_weird_column(self):
+        rv = self.client.post('/users', data=json.dumps(
+                              {'username': 'test',
+                               'bobbeh': 'something'}
+                              ), follow_redirects=True)
+        assert rv.status_code == 400
 
     def test_error_delete_fail_user(self):
         rv = self.client.delete('/users/asfdf', follow_redirects=True)
