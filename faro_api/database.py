@@ -45,9 +45,8 @@ def create_db_environment(app):
         db_session.close()
 
     from faro_api.models import event
-    from faro_api.models import template
     from faro_api.models import user
-    [user, event, template]
+    [user, event]
     model().metadata.create_all(bind=engine)
 
     return db_session
