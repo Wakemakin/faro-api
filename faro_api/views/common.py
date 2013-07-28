@@ -19,9 +19,6 @@ class BaseApi(views.MethodView):
         self._configure_endpoint()
         self.additional_filters = {}
 
-    def _configure_endpoint(self):
-        pass
-
     @utils.crossdomain(origin='*')
     def options(self, id, eventid):
         return flask.current_app.make_default_options_response()
@@ -106,7 +103,3 @@ class BaseApi(views.MethodView):
             return flask.Response(status=204)
         except sa_exc.NoResultFound:
             raise exc.NotFound()
-        except Exception as e:
-            logger.error(e)
-            session.rollback()
-            raise exc.UnknownError()

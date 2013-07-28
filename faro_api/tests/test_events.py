@@ -161,6 +161,16 @@ class EventTest(unittest.TestCase):
                               ), follow_redirects=True)
         assert rv.status_code == 400
 
+    def test_error_put_empty_body(self):
+        rv = self.create_event_with_user("test")
+        res = json.loads(rv.data)
+        id = res['id']
+        rv = self.client.put('/events/' + id, data=json.dumps(
+                             {}
+                             ), follow_redirects=True)
+        logger.debug(rv.data)
+        assert rv.status_code == 400
+
     def test_error_post_event_no_name(self):
         rv = self.create_user('test_user')
         rv = self.client.post('/events', data=json.dumps(
@@ -178,6 +188,14 @@ class EventTest(unittest.TestCase):
                                'owner_id': 'test_user'}
                               ), follow_redirects=True)
         assert rv.status_code == 405
+
+    def test_error_post_event_no_user(self):
+        rv = self.create_user('test_user')
+        rv = self.client.post('/events', data=json.dumps(
+                              {'name': 'test',
+                               'description': 'derp'}
+                              ), follow_redirects=True)
+        assert rv.status_code == 409
 
     def test_error_put_event_with_id(self):
         rv = self.create_event_with_user("test")
