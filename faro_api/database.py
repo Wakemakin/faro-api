@@ -60,6 +60,7 @@ def get_one(session, cls, filter_value, alternative_check=None):
         return session.query(cls).filter(cls.id == filter_value).one()
     elif alternative_check is not None:
         alt_col = getattr(cls, alternative_check)
+        filter_value = filter_value.lower()
         return session.query(cls).filter(alt_col == filter_value).one()
     raise exc.InvalidInput()
 
