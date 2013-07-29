@@ -9,6 +9,16 @@ class FaroException(http.HTTPException):
             self.information = kwargs['information']
 
 
+class EventRequired(FaroException):
+    code = 409
+    information = "Event required"
+
+
+class OwnerRequired(FaroException):
+    code = 409
+    information = "Owner required"
+
+
 class UnknownError(FaroException):
     code = 500
     information = "Unknown error has occured"

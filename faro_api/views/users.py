@@ -4,9 +4,7 @@ import flask
 import sqlalchemy.exc
 import sqlalchemy.orm.exc
 
-from faro_api import database as db
 from faro_api.exceptions import common as exc
-from faro_api.models import event as event_model
 from faro_api.models import user as user_model
 from faro_api.views import common
 
@@ -44,15 +42,11 @@ class UserApi(common.BaseApi):
         self.blueprint = mod
 
     def get(self, id, eventid, **kwargs):
-        session = flask.g.session
-        if eventid is not None:
-            try:
-                event = db.get_one(session, event_model.Event, eventid)
-                return super(UserApi, self).get(event.owner_id,
-                                                with_events=True)
-            except sqlalchemy.orm.exc.NoResultFound:
-                raise exc.NotFound()
-        return super(UserApi, self).get(id, with_events=True)
+        user_id = id
+        event = self.attach_event(eventid, required=False)
+        if event is not None:
+            user_id = event.owner_id
+        return super(UserApi, self).get(user_id, with_events=True)
 
     def post(self):
         try:
