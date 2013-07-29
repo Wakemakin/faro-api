@@ -26,17 +26,20 @@ def app(testing=False):
         def before_request():
             flask.g.session = session
 
+        from faro_api.views import dataproviders
         from faro_api.views import endpoint
         from faro_api.views import events
-        from faro_api.views import templates
+        from faro_api.views import questions
         from faro_api.views import users
         app.instance.register_blueprint(endpoint.mod)
         user_bp = users.UserApi()
         event_bp = events.EventApi()
-        template_bp = templates.TemplateApi()
+        question_bp = questions.QuestionApi()
+        dps_bp = dataproviders.DataProviderApi()
         app.instance.register_blueprint(user_bp.blueprint)
         app.instance.register_blueprint(event_bp.blueprint)
-        app.instance.register_blueprint(template_bp.blueprint)
+        app.instance.register_blueprint(question_bp.blueprint)
+        app.instance.register_blueprint(dps_bp.blueprint)
 
         try:
             app.instance.config.from_envvar('FARO_SETTINGS')

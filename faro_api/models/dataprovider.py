@@ -5,36 +5,34 @@ import faro_api.database as db
 import faro_api.utils as utils
 
 
-class Template(db.model()):
+class DataProvider(db.model()):
     id = sa.Column(sa.Unicode(36), primary_key=True)
-    title = sa.Column(sa.Unicode(32), nullable=False)
-    template_type = sa.Column(sa.Unicode(32), nullable=False)
     description = sa.Column(sa.Unicode(128), nullable=True)
+    name = sa.Column(sa.Unicode(32), nullable=False)
+    public = sa.Column(sa.Boolean, default=False)
     owner_id = sa.Column(sa.Unicode(36), sa.ForeignKey('users.id'),
-                         nullable=True)
-    owner = orm.relationship('User', backref=orm.backref('templates'))
+                         nullable=False)
+    backref = orm.backref('dataproviders', cascade='all,delete')
+    owner = orm.relationship('User', backref=backref)
 
     def __init__(self, **kwargs):
-        super(Template, self).__init__(**kwargs)
+        super(DataProvider, self).__init__(**kwargs)
         self.id = unicode(utils.make_uuid())
 
     @staticmethod
     def read_only_columns():
-        return ['template_type']
+        return []
 
     @staticmethod
     def query_columns():
-        return ['title',
-                'owner_id',
-                'template_type',
-                'date_created']
+        return []
 
     def to_dict(self, with_owner=False):
-        ret = {'title': self.title,
-               'id': self.id,
+        ret = {'name': self.name,
                'description': self.description,
-               'template_type': self.template_type,
-               'owner': None,
+               'id': self.id,
+               'owner_id': self.owner_id,
+               'public': self.public,
                'date_created': str(self.date_created)}
         if with_owner and self.owner is not None:
             ret['owner'] = self.owner.to_dict()

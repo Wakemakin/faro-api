@@ -44,13 +44,73 @@ def create_db_environment(app):
         db_session.remove()
         db_session.close()
 
+    from faro_api.models import action
+    from faro_api.models import dataprovider
     from faro_api.models import event
-    from faro_api.models import template
+    from faro_api.models import item
+    from faro_api.models import question
     from faro_api.models import user
-    [user, event, template]
+    [user, event, item, question, action, dataprovider]
     model().metadata.create_all(bind=engine)
 
     return db_session
+
+
+def get_owner(userid):
+    from faro_api.models import user
+    import sqlalchemy.orm.exc as sa_exc
+    session = flask.g.session
+    filters = flask.request.args
+    data = None
+    try:
+        data = utils.json_request_data(flask.request.data)
+    except exc.InvalidInput:
+        pass
+    user_id = None
+    if userid is not None:
+        user_id = userid
+    elif data is not None and 'owner_id' in data:
+        user_id = data['owner_id']
+    elif 'owner_id' in filters:
+        user_id = filters.getlist('owner_id')[0]
+
+    if user_id is None and userid is None:
+        return None, None
+
+    try:
+        user = get_one(session, user.User, user_id, "username")
+        return user, user_id
+    except sa_exc.NoResultFound:
+        raise exc.NotFound()
+
+
+def get_event(eventid):
+    from faro_api.models import event
+    import sqlalchemy.orm.exc as sa_exc
+    session = flask.g.session
+    filters = flask.request.args
+    data = None
+    try:
+        data = utils.json_request_data(flask.request.data)
+    except exc.InvalidInput:
+        pass
+    event_id = None
+    if event is not None:
+        event_id = eventid
+    elif data is not None and 'event_id' in data:
+        event_id = data['event_id']
+    elif 'event_id' in filters:
+        event_id = filters.getlist('event_id')[0]
+    logger.debug(event_id)
+
+    if event_id is None and eventid is None:
+        return None, None
+
+    try:
+        event = get_one(session, event.Event, event_id)
+        return event, event_id
+    except sa_exc.NoResultFound:
+        raise exc.NotFound()
 
 
 def get_one(session, cls, filter_value, alternative_check=None):
@@ -58,8 +118,9 @@ def get_one(session, cls, filter_value, alternative_check=None):
         return session.query(cls).filter(cls.id == filter_value).one()
     elif alternative_check is not None:
         alt_col = getattr(cls, alternative_check)
+        filter_value = filter_value.lower()
         return session.query(cls).filter(alt_col == filter_value).one()
-    raise exc.NotFound()
+    raise exc.InvalidInput()
 
 
 def create_filters(query, cls, filter_list, additional_filters):
@@ -89,7 +150,6 @@ def handle_paging(query, filters, total, url):
         raise exc.NotFound()
     output = {'total': total, 'page_number': page, 'page_size': page_size}
     o = urlparse.urlsplit(url)
-    logger.debug(o)
     if len(o.query) > 0:
         if 'p' in filters:
             if page > 1:
@@ -109,13 +169,6 @@ def handle_paging(query, filters, total, url):
                                                qs, o.fragment])
                 output['next'] = new_url
         else:
-            if page > 1:
-                qs = urlparse.parse_qsl(o.query)
-                qs.append(('p', page - 1))
-                qs = urllib.urlencode(qs)
-                new_url = urlparse.urlunsplit([o.scheme, o.netloc, o.path,
-                                               qs, o.fragment])
-                output['prev'] = new_url
             if total > page_size and page * page_size < total:
                 qs = urlparse.parse_qsl(o.query)
                 qs.append(('p', page + 1))
@@ -138,15 +191,6 @@ class Base(object):
         return cls.__name__.lower() + "s"
 
     date_created = sa.Column(sa.DateTime, default=sa.func.now())
-
-    def __init__(self, **kwargs):
-        pass
-
-    def to_dict(self):
-        pass
-
-    def read_only_columns(self):
-        return []
 
     def update(self, **kwargs):
         for key, value in kwargs.iteritems():

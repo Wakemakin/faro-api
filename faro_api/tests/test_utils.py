@@ -1,7 +1,9 @@
+import json
 import logging
 import unittest
 import uuid
 
+import faro_api
 from faro_api import utils
 
 logger = logging.getLogger('faro_api.'+__name__)
@@ -10,10 +12,18 @@ logger = logging.getLogger('faro_api.'+__name__)
 class UserTest(unittest.TestCase):
 
     def setUp(self):
-        pass
+        self.app = faro_api.app(testing=True)
+        self.client = self.app.test_client()
 
     def tearDown(self):
-        pass
+        import os
+        os.remove(self.app.config['DATABASE_FILE'])
+        del os
+
+    def create_user(self, name):
+        return self.client.post('/users', data=json.dumps(
+                                {'username': name}
+                                ), follow_redirects=True)
 
     def test_generate_temp_database(self):
         """Ensure that the file names created are unique each time."""
@@ -30,6 +40,29 @@ class UserTest(unittest.TestCase):
         assert counting_function() == 2
         assert counting_function() == 3
         assert counting_function() == 4
+
+    def test_require_body(self):
+        rv = self.client.post('/users', data=None, follow_redirects=True)
+        assert rv.status_code == 400
+        rv = self.client.post('/users', data={}, follow_redirects=True)
+        assert rv.status_code == 400
+        rv = self.client.post('/users', data='', follow_redirects=True)
+        assert rv.status_code == 400
+
+    def test_json_request_data(self):
+        rv = self.client.post('/users', data="asdf", follow_redirects=True)
+        assert rv.status_code == 400
+        rv = self.client.post('/users', data="{asdf: 'a'}",
+                              follow_redirects=True)
+        assert rv.status_code == 400
+
+    def test_cors(self):
+        rv = self.client.options('/users')
+        assert 'Access-Control-Allow-Origin' in rv.headers
+        assert 'Access-Control-Allow-Methods' in rv.headers
+        assert 'Access-Control-Max-Age' in rv.headers
+        rv = self.client.options('/mistake')
+        assert rv.status_code == 404
 
     def test_make_uuid(self):
         temp_uuid = utils.make_uuid()
