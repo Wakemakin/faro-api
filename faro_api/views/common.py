@@ -18,6 +18,42 @@ class BaseApi(views.MethodView):
         self.alternate_key = None
         self._configure_endpoint()
         self.additional_filters = {}
+        self.attachments = {}
+
+    def attach_event(self, event_id, required=True):
+        event, id = db.get_event(event_id)
+        logger.debug(event_id)
+        if required and event is None:
+            if id is None:
+                raise exc.EventRequired()
+            if id is not None:
+                raise exc.NotFound()
+        if event is not None:
+            self.attachments['event'] = event
+            return event
+        return None
+
+    def attach_owner(self, owner_id, required=True):
+        user, id = db.get_owner(owner_id)
+        if required and user is None:
+            if id is None:
+                raise exc.OwnerRequired()
+            if id is not None:
+                raise exc.NotFound()
+        if user is not None:
+            self.attachments['owner'] = user
+            return user
+        return None
+
+    def add_event_filter(self, event_id):
+        event, id = db.get_event(event_id)
+        if event is not None:
+            self.additional_filters['event_id'] = event.id
+
+    def add_owner_filter(self, owner_id):
+        user, id = db.get_owner(owner_id)
+        if user is not None:
+            self.additional_filters['owner_id'] = user.id
 
     @utils.crossdomain(origin='*')
     def options(self, id, eventid):
@@ -56,12 +92,9 @@ class BaseApi(views.MethodView):
             raise exc.RequiresBody()
         try:
             result = self.base_resource(**data)
-            if "attachments" in kwargs:
-                attachments = kwargs["attachments"]
-                if attachments is not None:
-                    for attach, value in attachments.items():
-                        setattr(result, attach, value)
-                kwargs.pop("attachments")
+            for attach, value in self.attachments.items():
+                logger.debug(attach)
+                setattr(result, attach, value)
             session.add(result)
             session.commit()
             return jsonp.jsonify(result.to_dict(**kwargs)), 201, {}
@@ -80,12 +113,8 @@ class BaseApi(views.MethodView):
         try:
             result = db.get_one(session, self.base_resource, id,
                                 self.alternate_key)
-            if "attachments" in kwargs:
-                attachments = kwargs["attachments"]
-                if attachments is not None:
-                    for attach, value in attachments.items():
-                        setattr(result, attach, value)
-                kwargs.pop("attachments")
+            for attach, value in self.attachments.items():
+                setattr(result, attach, value)
             result.update(**data)
             session.commit()
             return jsonp.jsonify(result.to_dict(**kwargs)), 200, {}

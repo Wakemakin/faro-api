@@ -63,7 +63,8 @@ class QuestionTest(unittest.TestCase):
         uri = "/users/john/questions"
         rv = self.client.post(uri, data=json.dumps(
                               {'name': 'test',
-                               'event_id': event_id}), follow_redirects=True)
+                               'event_id': event_id}),
+                              follow_redirects=True)
         res = json.loads(rv.data)
         logger.debug(rv.data)
         assert rv.status_code == 201
