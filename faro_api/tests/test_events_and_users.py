@@ -72,6 +72,7 @@ class EventAndUserTest(unittest.TestCase):
         rv = self.client.get('/events/%s/owner' % event_id,
                              follow_redirects=True)
         res = json.loads(rv.data)
+        logger.debug(rv.data)
         assert rv.status_code == 200
         assert res['object']['username'] == 'test_user'
 
