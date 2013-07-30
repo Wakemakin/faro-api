@@ -45,14 +45,57 @@ def create_db_environment(app):
         db_session.close()
 
     from faro_api.models import action
+    from faro_api.models import dataprovider
     from faro_api.models import event
     from faro_api.models import item
     from faro_api.models import question
     from faro_api.models import user
-    [user, event, item, question, action]
+    [user, event, item, question, action, dataprovider]
     model().metadata.create_all(bind=engine)
 
     return db_session
+
+
+def get_object(key, object_type, filter_key, alternate_key_column=None):
+    import sqlalchemy.orm.exc as sa_exc
+    session = flask.g.session
+    filters = flask.request.args
+    data = None
+    try:
+        data = utils.json_request_data(flask.request.data)
+    except exc.InvalidInput:
+        pass
+    found_id = None
+    if key is not None:
+        found_id = key
+    elif data is not None and filter_key in data:
+        found_id = data[filter_key]
+    elif filter_key in filters:
+        found_id = filters.getlist(filter_key)[0]
+
+    if found_id is None and key is None:
+        return None, None
+
+    try:
+        if alternate_key_column is not None:
+            obj = get_one(session, object_type, found_id,
+                          alternate_key_column)
+        else:
+            obj = get_one(session, object_type, found_id)
+        return obj, found_id
+    except sa_exc.NoResultFound:
+        raise exc.NotFound()
+
+
+def get_owner(userid):
+    from faro_api.models import user
+    return get_object(userid, user.User, 'owner_id',
+                      alternate_key_column='username')
+
+
+def get_event(eventid):
+    from faro_api.models import event
+    return get_object(eventid, event.Event, 'event_id')
 
 
 def get_one(session, cls, filter_value, alternative_check=None):
@@ -92,7 +135,6 @@ def handle_paging(query, filters, total, url):
         raise exc.NotFound()
     output = {'total': total, 'page_number': page, 'page_size': page_size}
     o = urlparse.urlsplit(url)
-    logger.debug(o)
     if len(o.query) > 0:
         if 'p' in filters:
             if page > 1:
