@@ -10,3 +10,4 @@ gunicorn
 setup.cfg
 setup.py
 tox.ini
+RELEASE
