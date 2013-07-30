@@ -5,4 +5,5 @@ source .venv/bin/activate
 WORKERS=2
 PORT=8000
 IP=127.0.0.1
+cd ..
 exec gunicorn -w $WORKERS -b $IP:$PORT "faro_api:app().wsgi_app"
