@@ -6,6 +6,7 @@ requirements
 rakefile
 run.py
 scripts
+gunicorn
 setup.cfg
 setup.py
 tox.ini
