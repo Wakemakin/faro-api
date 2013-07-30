@@ -6,3 +6,4 @@ flask-jsonpify
 mysql-python
 gunicorn
 eventlet>=0.9.7
+setproctitle
