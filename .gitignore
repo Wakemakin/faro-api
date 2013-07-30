@@ -38,3 +38,4 @@ nosetests.xml
 resty
 faro.db
 logs
+RELEASE
