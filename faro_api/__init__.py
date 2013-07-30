@@ -9,7 +9,7 @@ class MyFlask(flask.Flask):
 
 
 @utils.static_var("instance", None)
-def app(testing=False):
+def app(testing=False, create_db=False):
     if testing or app.instance is None:
         app.instance = utils.make_json_app(MyFlask(__name__))
         config = 'apiconfig.DevelopmentConfig'
@@ -21,6 +21,8 @@ def app(testing=False):
             app.instance.config['DATABASE_URI'] = uri
         app.instance.config.from_object(config)
         session = db.create_db_environment(app.instance)
+        if create_db:
+            return True
 
         @app.instance.before_request
         def before_request():
