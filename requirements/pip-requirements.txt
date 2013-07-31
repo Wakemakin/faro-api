@@ -7,3 +7,4 @@ mysql-python
 gunicorn
 eventlet>=0.9.7
 setproctitle
+-e git://github.com/Wakemakin/faro-common.git@development#egg=faro-common
