@@ -3,6 +3,8 @@ import flask
 import faro_api.database as db
 import faro_api.utils as utils
 
+import faro_common.flask as flaskutils
+
 
 class MyFlask(flask.Flask):
     pass
@@ -11,7 +13,7 @@ class MyFlask(flask.Flask):
 @utils.static_var("instance", None)
 def app(testing=False, create_db=False):
     if testing or app.instance is None:
-        app.instance = utils.make_json_app(MyFlask(__name__))
+        app.instance = flaskutils.make_json_app(MyFlask(__name__))
         config = 'apiconfig.DevelopmentConfig'
         if testing:
             config = 'apiconfig.TestConfig'
