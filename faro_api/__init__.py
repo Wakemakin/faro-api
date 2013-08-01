@@ -2,7 +2,7 @@ import flask
 
 import faro_api.database as db
 import faro_api.utils as utils
-
+import faro_common.decorators as dec
 import faro_common.flask as flaskutils
 
 
@@ -10,7 +10,7 @@ class MyFlask(flask.Flask):
     pass
 
 
-@utils.static_var("instance", None)
+@dec.static_var("instance", None)
 def app(testing=False, create_db=False):
     if testing or app.instance is None:
         app.instance = flaskutils.make_json_app(MyFlask(__name__))
