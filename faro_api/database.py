@@ -9,8 +9,10 @@ import sqlalchemy.ext.declarative as decl
 import sqlalchemy.orm as orm
 import sqlite3
 
-from faro_api.exceptions import common as exc
-from faro_api import utils as utils
+from faro_common import decorators as dec
+from faro_common.exceptions import common as exc
+from faro_common import flask as flask_utils
+from faro_common import utils as utils
 
 
 @sa.event.listens_for(sqlalchemy.engine.Engine, "connect")
@@ -24,7 +26,7 @@ def _set_sqlite_pragma(dbapi_connection, connection_record):
 logger = logging.getLogger("faro_api."+__name__)
 
 
-@utils.static_var("instance", None)
+@dec.static_var("instance", None)
 def model():
     if model.instance is None:
         model.instance = decl.declarative_base(cls=Base)
@@ -62,7 +64,7 @@ def get_object(key, object_type, filter_key, alternate_key_column=None):
     filters = flask.request.args
     data = None
     try:
-        data = utils.json_request_data(flask.request.data)
+        data = flask_utils.json_request_data(flask.request.data)
     except exc.InvalidInput:
         pass
     found_id = None
