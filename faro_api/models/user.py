@@ -1,7 +1,7 @@
 import sqlalchemy as sa
 
 import faro_api.database as db
-import faro_api.utils as utils
+import faro_common.utils as utils
 
 
 class User(db.model()):

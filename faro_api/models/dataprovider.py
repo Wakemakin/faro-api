@@ -2,7 +2,7 @@ import sqlalchemy as sa
 import sqlalchemy.orm as orm
 
 import faro_api.database as db
-import faro_api.utils as utils
+import faro_common.utils as utils
 
 
 class DataProvider(db.model()):
