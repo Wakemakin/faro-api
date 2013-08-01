@@ -1,0 +1,10 @@
+flask==0.9
+sqlalchemy
+python-dateutil>=2.0
+flask-sqlalchemy
+flask-jsonpify
+mysql-python
+gunicorn
+eventlet>=0.9.7
+setproctitle
+-e git://github.com/Wakemakin/faro-common.git@development#egg=faro-common

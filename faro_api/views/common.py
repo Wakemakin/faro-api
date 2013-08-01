@@ -6,8 +6,10 @@ import flask.views as views
 import sqlalchemy.orm.exc as sa_exc
 
 from faro_api import database as db
-from faro_api.exceptions import common as exc
-from faro_api import utils
+from faro_api.exceptions import common as f_exc
+from faro_common.exceptions import common as exc
+from faro_common import flask as flaskutils
+import faro_common.flask.sautils as sautils
 
 logger = logging.getLogger('faro_api.'+__name__)
 
@@ -25,7 +27,7 @@ class BaseApi(views.MethodView):
         logger.debug(event_id)
         if required and event is None:
             if id is None:
-                raise exc.EventRequired()
+                raise f_exc.EventRequired()
             if id is not None:
                 raise exc.NotFound()
         if event is not None:
@@ -37,7 +39,7 @@ class BaseApi(views.MethodView):
         user, id = db.get_owner(owner_id)
         if required and user is None:
             if id is None:
-                raise exc.OwnerRequired()
+                raise f_exc.OwnerRequired()
             if id is not None:
                 raise exc.NotFound()
         if user is not None:
@@ -55,11 +57,11 @@ class BaseApi(views.MethodView):
         if user is not None:
             self.additional_filters['owner_id'] = user.id
 
-    @utils.crossdomain(origin='*')
+    @flaskutils.crossdomain(origin='*')
     def options(self, id, eventid):
         return flask.current_app.make_default_options_response()
 
-    @utils.crossdomain(origin='*')
+    @flaskutils.crossdomain(origin='*')
     def get(self, id, **kwargs):
         session = flask.g.session
         filters = flask.request.args
@@ -67,27 +69,28 @@ class BaseApi(views.MethodView):
         if id is None:
             res = list()
             if len(filters) or len(self.additional_filters):
-                q = db.create_filters(q, self.base_resource,
-                                      filters, self.additional_filters)
+                q = sautils.create_filters(q, self.base_resource,
+                                           filters, self.additional_filters)
             total = q.count()
-            q, output = db.handle_paging(q, filters, total, flask.request.url)
+            q, output = sautils.handle_paging(q, filters, total,
+                                              flask.request.url)
             results = q.all()
             if results is not None:
                 for result in results:
                     res.append(result.to_dict(**kwargs))
             return jsonp.jsonify(objects=res, **output), 200, {}
         try:
-            result = db.get_one(session, self.base_resource, id,
-                                self.alternate_key)
+            result = sautils.get_one(session, self.base_resource, id,
+                                     self.alternate_key)
             return jsonp.jsonify(object=result.to_dict(**kwargs)), 200, {}
         except sa_exc.NoResultFound:
             raise exc.NotFound()
 
-    @utils.require_body
-    @utils.crossdomain(origin='*')
+    @flaskutils.require_body
+    @flaskutils.crossdomain(origin='*')
     def post(self, **kwargs):
         session = flask.g.session
-        data = utils.json_request_data(flask.request.data)
+        data = flaskutils.json_request_data(flask.request.data)
         if not data:
             raise exc.RequiresBody()
         try:
@@ -103,16 +106,16 @@ class BaseApi(views.MethodView):
             session.rollback()
             raise exc.InvalidInput
 
-    @utils.require_body
-    @utils.crossdomain(origin='*')
+    @flaskutils.require_body
+    @flaskutils.crossdomain(origin='*')
     def put(self, id, **kwargs):
         session = flask.g.session
-        data = utils.json_request_data(flask.request.data)
+        data = flaskutils.json_request_data(flask.request.data)
         if not data:
             raise exc.RequiresBody()
         try:
-            result = db.get_one(session, self.base_resource, id,
-                                self.alternate_key)
+            result = sautils.get_one(session, self.base_resource, id,
+                                     self.alternate_key)
             for attach, value in self.attachments.items():
                 setattr(result, attach, value)
             result.update(**data)
@@ -121,12 +124,12 @@ class BaseApi(views.MethodView):
         except sa_exc.NoResultFound:
             raise exc.NotFound()
 
-    @utils.crossdomain(origin='*')
+    @flaskutils.crossdomain(origin='*')
     def delete(self, id):
         session = flask.g.session
         try:
-            result = db.get_one(session, self.base_resource, id,
-                                self.alternate_key)
+            result = sautils.get_one(session, self.base_resource, id,
+                                     self.alternate_key)
             session.delete(result)
             session.commit()
             return flask.Response(status=204)

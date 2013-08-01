@@ -3,7 +3,7 @@ import logging
 import sqlalchemy as sa
 import sqlalchemy.ext.declarative as decl
 
-from faro_api.exceptions import common as exc
+from faro_common.exceptions import common as exc
 
 logger = logging.getLogger("faro_api."+__name__)
 

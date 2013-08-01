@@ -2,16 +2,18 @@ import flask
 
 import faro_api.database as db
 import faro_api.utils as utils
+import faro_common.decorators as dec
+import faro_common.flask as flaskutils
 
 
 class MyFlask(flask.Flask):
     pass
 
 
-@utils.static_var("instance", None)
-def app(testing=False):
+@dec.static_var("instance", None)
+def app(testing=False, create_db=False):
     if testing or app.instance is None:
-        app.instance = utils.make_json_app(MyFlask(__name__))
+        app.instance = flaskutils.make_json_app(MyFlask(__name__))
         config = 'apiconfig.DevelopmentConfig'
         if testing:
             config = 'apiconfig.TestConfig'
@@ -21,6 +23,8 @@ def app(testing=False):
             app.instance.config['DATABASE_URI'] = uri
         app.instance.config.from_object(config)
         session = db.create_db_environment(app.instance)
+        if create_db:
+            return True
 
         @app.instance.before_request
         def before_request():
