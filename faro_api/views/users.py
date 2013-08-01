@@ -4,14 +4,14 @@ import flask
 import sqlalchemy.exc
 import sqlalchemy.orm.exc
 
-from faro_api.exceptions import common as exc
+from faro_api.exceptions import common as f_exc
 from faro_api.models import user as user_model
 from faro_api.views import common
 
 logger = logging.getLogger('faro_api.'+__name__)
 
 
-class UniqueUsernameRequired(exc.FaroException):
+class UniqueUsernameRequired(f_exc.FaroApiException):
     code = 409
     information = "Username must be unique"
 

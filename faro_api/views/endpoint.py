@@ -4,7 +4,7 @@ import os
 import flask
 
 import faro_api
-import faro_api.exceptions.common as exc
+import faro_common.exceptions.common as exc
 
 
 mod = flask.Blueprint('endpoint', __name__)
