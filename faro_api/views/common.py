@@ -9,6 +9,7 @@ from faro_api import database as db
 from faro_api.exceptions import common as f_exc
 from faro_common.exceptions import common as exc
 from faro_common import flask as flaskutils
+import faro_common.flask.sautils as sautils
 
 logger = logging.getLogger('faro_api.'+__name__)
 
@@ -68,18 +69,19 @@ class BaseApi(views.MethodView):
         if id is None:
             res = list()
             if len(filters) or len(self.additional_filters):
-                q = db.create_filters(q, self.base_resource,
-                                      filters, self.additional_filters)
+                q = sautils.create_filters(q, self.base_resource,
+                                           filters, self.additional_filters)
             total = q.count()
-            q, output = db.handle_paging(q, filters, total, flask.request.url)
+            q, output = sautils.handle_paging(q, filters, total,
+                                              flask.request.url)
             results = q.all()
             if results is not None:
                 for result in results:
                     res.append(result.to_dict(**kwargs))
             return jsonp.jsonify(objects=res, **output), 200, {}
         try:
-            result = db.get_one(session, self.base_resource, id,
-                                self.alternate_key)
+            result = sautils.get_one(session, self.base_resource, id,
+                                     self.alternate_key)
             return jsonp.jsonify(object=result.to_dict(**kwargs)), 200, {}
         except sa_exc.NoResultFound:
             raise exc.NotFound()
@@ -112,8 +114,8 @@ class BaseApi(views.MethodView):
         if not data:
             raise exc.RequiresBody()
         try:
-            result = db.get_one(session, self.base_resource, id,
-                                self.alternate_key)
+            result = sautils.get_one(session, self.base_resource, id,
+                                     self.alternate_key)
             for attach, value in self.attachments.items():
                 setattr(result, attach, value)
             result.update(**data)
@@ -126,8 +128,8 @@ class BaseApi(views.MethodView):
     def delete(self, id):
         session = flask.g.session
         try:
-            result = db.get_one(session, self.base_resource, id,
-                                self.alternate_key)
+            result = sautils.get_one(session, self.base_resource, id,
+                                     self.alternate_key)
             session.delete(result)
             session.commit()
             return flask.Response(status=204)
