@@ -3,7 +3,7 @@ import logging
 import unittest
 
 import faro_api
-from faro_api import utils
+from faro_common import utils
 
 logger = logging.getLogger("faro_api."+__name__)
 
