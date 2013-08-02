@@ -29,20 +29,21 @@ class EventApi(common.BaseApi):
 
     def _configure_endpoint(self):
         mod = flask.Blueprint('events', __name__)
+        opt = 'OPTIONS'
 
         event_view = self.as_view('event_api')
         mod.add_url_rule('/users/<string:userid>/events',
                          defaults={'id': None},
-                         view_func=event_view, methods=['GET'])
+                         view_func=event_view, methods=['GET', opt])
         mod.add_url_rule('/users/<string:userid>/events',
-                         view_func=event_view, methods=['POST'])
+                         view_func=event_view, methods=['POST', opt])
         mod.add_url_rule('/events', defaults={'id': None,
                          'userid': None},
-                         view_func=event_view, methods=['GET'])
+                         view_func=event_view, methods=['GET', opt])
         mod.add_url_rule('/events', defaults={'userid': None},
-                         view_func=event_view, methods=['POST'])
+                         view_func=event_view, methods=['POST', opt])
         mod.add_url_rule('/events/<id>', view_func=event_view,
-                         methods=['GET', 'DELETE', 'PUT'],
+                         methods=['GET', 'DELETE', 'PUT', opt],
                          defaults={'userid': None})
         self.blueprint = mod
 
