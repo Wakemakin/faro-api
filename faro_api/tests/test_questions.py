@@ -38,6 +38,17 @@ class QuestionTest(unittest.TestCase):
                                  'owner_id': username}
                                 ), follow_redirects=True)
 
+    def test_regression_delete_user_with_questions(self):
+        rv = self.create_user("john")
+        res = json.loads(rv.data)
+        user_id = res['id']
+        uri = "/users/%s/questions" % user_id
+        rv = self.client.post(uri, data=json.dumps(
+                              {'name': 'test'}), follow_redirects=True)
+        assert rv.status_code == 201
+        rv = self.client.delete("/users/john", follow_redirects=True)
+        assert rv.status_code == 204
+
     def test_postget_question_under_user(self):
         rv = self.create_user("john")
         res = json.loads(rv.data)

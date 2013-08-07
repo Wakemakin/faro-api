@@ -1,12 +1,12 @@
 import sqlalchemy as sa
-#import sqlalchemy.orm as orm
 
 import faro_api.models.item as item
 import faro_common.utils as utils
 
 
 class Question(item.Item):
-    id = sa.Column(sa.Unicode(36), sa.ForeignKey('items.id'), primary_key=True)
+    id = sa.Column(sa.Unicode(36), sa.ForeignKey('items.id'),
+                   primary_key=True)
 
     __mapper_args__ = {
         'polymorphic_identity': 'question',
