@@ -1,4 +1,3 @@
-import sys
 import logging
 import argparse
 
@@ -12,13 +11,6 @@ parser.add_argument("--public", help="run on public host",
 args = parser.parse_args()
 
 logger = logging.getLogger('faro_api')
-logger.setLevel(logging.DEBUG)
-ch = logging.StreamHandler(sys.stdout)
-log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-formatter = logging.Formatter(log_format)
-
-ch.setFormatter(formatter)
-logger.addHandler(ch)
 
 if args.database:
     logger.debug("Initializing database. Data dropped.")

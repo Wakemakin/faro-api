@@ -1,6 +1,9 @@
 import flask
+import logging
+import sys
 
 import faro_api.database as db
+import faro_api.middleware.auth.noauth as auth
 import faro_api.utils as utils
 import faro_common.decorators as dec
 import faro_common.flask as flaskutils
@@ -8,6 +11,15 @@ import faro_common.flask as flaskutils
 
 class MyFlask(flask.Flask):
     pass
+
+logger = logging.getLogger('faro_api')
+logger.setLevel(logging.DEBUG)
+ch = logging.StreamHandler(sys.stdout)
+log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+formatter = logging.Formatter(log_format)
+
+ch.setFormatter(formatter)
+logger.addHandler(ch)
 
 
 @dec.static_var("instance", None)
@@ -49,4 +61,5 @@ def app(testing=False, create_db=False):
             app.instance.config.from_envvar('FARO_SETTINGS')
         except RuntimeError:
             pass
+    app.instance.wsgi_app = auth.NoAuthMiddleware(app.instance.wsgi_app)
     return app.instance
