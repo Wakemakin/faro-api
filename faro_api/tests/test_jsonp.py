@@ -25,18 +25,18 @@ class UserTest(unittest.TestCase):
 
     def test_ensure_jsonp_wraps(self):
         rv = self.client.get('/users?callback=foo')
-        assert 'foo(' in rv.data
-        assert '});' in rv.data
+        self.assertTrue('foo(' in rv.data)
+        self.assertTrue('});' in rv.data)
         mod_data = rv.data.replace('foo(', '')
         mod_data = mod_data.replace(');', '')
         rv = self.client.get('/users')
-        assert rv.data == mod_data
+        self.assertTrue(rv.data == mod_data)
         res = json.loads(mod_data)
-        assert res['objects'] == []
-        assert rv.status_code == 200
+        self.assertTrue(res['objects'] == [])
+        self.assertTrue(rv.status_code == 200)
 
     def test_ensure_jsonp_uses_callback(self):
         rv = self.client.get('/users?callback=foo')
-        assert 'foo(' in rv.data
+        self.assertTrue('foo(' in rv.data)
         rv = self.client.get('/users?callback=bar')
-        assert 'bar(' in rv.data
+        self.assertTrue('bar(' in rv.data)

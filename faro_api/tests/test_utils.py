@@ -17,4 +17,4 @@ class UtilTest(unittest.TestCase):
     def test_generate_temp_database(self):
         """Ensure that the file names created are unique each time."""
         filenames = set([utils.generate_temp_database() for i in range(100)])
-        assert len(filenames) == 100
+        self.assertTrue(len(filenames) == 100)
