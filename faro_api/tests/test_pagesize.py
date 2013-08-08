@@ -38,13 +38,13 @@ class PageTest(unittest.TestCase):
     def test_get_no_users_default_max(self):
         rv = self.client.get('/users')
         res = json.loads(rv.data)
-        assert len(res['objects']) == 0
-        assert res[self.tq] == 0
-        assert res[self.pnq] == 1
-        assert self.pnext not in res
-        assert self.pprev not in res
-        assert self.psq in res
-        assert res[self.psq] == self.page_size
+        self.assertTrue(len(res['objects']) == 0)
+        self.assertTrue(res[self.tq] == 0)
+        self.assertTrue(res[self.pnq] == 1)
+        self.assertTrue(self.pnext not in res)
+        self.assertTrue(self.pprev not in res)
+        self.assertTrue(self.psq in res)
+        self.assertTrue(res[self.psq] == self.page_size)
 
     def test_get_min_users_small_page(self):
         page_size = self.small_page_size
@@ -52,14 +52,14 @@ class PageTest(unittest.TestCase):
         rv = self.client.get('/users?%s=%s' %
                              (self.psq, page_size))
         res = json.loads(rv.data)
-        assert len(res['objects']) == page_size
-        assert res[self.tq] == self.total
-        assert res[self.pnq] == 1
-        assert self.pnext in res
-        assert ('%s=2' % self.pq) in res[self.pnext]
-        assert self.pprev not in res
-        assert self.psq in res
-        assert res[self.psq] == page_size
+        self.assertTrue(len(res['objects']) == page_size)
+        self.assertTrue(res[self.tq] == self.total)
+        self.assertTrue(res[self.pnq] == 1)
+        self.assertTrue(self.pnext in res)
+        self.assertTrue(('%s=2' % self.pq) in res[self.pnext])
+        self.assertTrue(self.pprev not in res)
+        self.assertTrue(self.psq in res)
+        self.assertTrue(res[self.psq] == page_size)
 
     def test_get_min_users_medium_page(self):
         page_size = self.medium_page_size
@@ -67,14 +67,14 @@ class PageTest(unittest.TestCase):
         rv = self.client.get('/users?%s=%s' %
                              (self.psq, page_size))
         res = json.loads(rv.data)
-        assert len(res['objects']) == page_size
-        assert res[self.tq] == self.total
-        assert res[self.pnq] == 1
-        assert self.pnext in res
-        assert ('%s=2' % self.pq) in res[self.pnext]
-        assert self.pprev not in res
-        assert self.psq in res
-        assert res[self.psq] == page_size
+        self.assertTrue(len(res['objects']) == page_size)
+        self.assertTrue(res[self.tq] == self.total)
+        self.assertTrue(res[self.pnq] == 1)
+        self.assertTrue(self.pnext in res)
+        self.assertTrue(('%s=2' % self.pq) in res[self.pnext])
+        self.assertTrue(self.pprev not in res)
+        self.assertTrue(self.psq in res)
+        self.assertTrue(res[self.psq] == page_size)
 
     def test_get_min_users_large_page(self):
         page_size = self.large_page_size
@@ -82,13 +82,13 @@ class PageTest(unittest.TestCase):
         rv = self.client.get('/users?%s=%s' %
                              (self.psq, page_size))
         res = json.loads(rv.data)
-        assert len(res['objects']) == page_size
-        assert res[self.tq] == self.total
-        assert res[self.pnq] == 1
-        assert self.pnext not in res
-        assert self.pprev not in res
-        assert self.psq in res
-        assert res[self.psq] == page_size
+        self.assertTrue(len(res['objects']) == page_size)
+        self.assertTrue(res[self.tq] == self.total)
+        self.assertTrue(res[self.pnq] == 1)
+        self.assertTrue(self.pnext not in res)
+        self.assertTrue(self.pprev not in res)
+        self.assertTrue(self.psq in res)
+        self.assertTrue(res[self.psq] == page_size)
 
     def test_get_min_users_too_big_page(self):
         true_page = self.maximum_page_size
@@ -98,14 +98,14 @@ class PageTest(unittest.TestCase):
         rv = self.client.get('/users?%s=%s' %
                              (self.psq, page_size))
         res = json.loads(rv.data)
-        assert len(res['objects']) == true_page
-        assert res[self.tq] == total
-        assert res[self.pnq] == 1
-        assert self.pnext in res
-        assert ('%s=2' % self.pq) in res[self.pnext]
-        assert self.pprev not in res
-        assert self.psq in res
-        assert res[self.psq] == true_page
+        self.assertTrue(len(res['objects']) == true_page)
+        self.assertTrue(res[self.tq] == total)
+        self.assertTrue(res[self.pnq] == 1)
+        self.assertTrue(self.pnext in res)
+        self.assertTrue(('%s=2' % self.pq) in res[self.pnext])
+        self.assertTrue(self.pprev not in res)
+        self.assertTrue(self.psq in res)
+        self.assertTrue(res[self.psq] == true_page)
 
     def test_get_one_user_at_time(self):
         page_size = 1
@@ -116,19 +116,21 @@ class PageTest(unittest.TestCase):
             rv = self.client.get(uri)
             res = json.loads(rv.data)
             if i < self.total - 1:
-                assert self.pnext in res
-                assert 'p=%s' % (i+2) in res[self.pnext]
-                assert ('%s=%s' % (self.pq, str(i+2))) in res[self.pnext]
+                self.assertTrue(self.pnext in res)
+                self.assertTrue('p=%s' % (i+2) in res[self.pnext])
+                self.assertTrue(('%s=%s' %
+                                (self.pq, str(i+2))) in res[self.pnext])
                 uri = res[self.pnext].replace('http://localhost', '')
             else:
-                assert self.pnext not in res
+                self.assertTrue(self.pnext not in res)
             if i > 0:
-                assert self.pprev in res
-                assert ('%s=%s' % (self.pq, str(i))) in res[self.pprev]
+                self.assertTrue(self.pprev in res)
+                self.assertTrue(('%s=%s' %
+                                (self.pq, str(i))) in res[self.pprev])
             else:
-                assert self.pprev not in res
-            assert len(res['objects']) == page_size
-            assert self.psq in res
-            assert res[self.psq] == page_size
+                self.assertTrue(self.pprev not in res)
+            self.assertTrue(len(res['objects']) == page_size)
+            self.assertTrue(self.psq in res)
+            self.assertTrue(res[self.psq] == page_size)
             i = i + 1
-        assert i == self.total
+        self.assertTrue(i == self.total)
