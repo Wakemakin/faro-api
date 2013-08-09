@@ -1,4 +1,5 @@
 import sqlalchemy as sa
+import sqlalchemy.orm as orm
 
 import faro_api.database as db
 import faro_common.utils as utils
@@ -10,6 +11,8 @@ class User(db.model()):
     display_name = sa.Column(sa.Unicode(32), unique=True, nullable=False)
     first_name = sa.Column(sa.Unicode(32))
     last_name = sa.Column(sa.Unicode(32))
+
+    roles = orm.relationship('roles',backref='users', secondary = users_roles)
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
