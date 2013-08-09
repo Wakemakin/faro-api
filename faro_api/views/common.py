@@ -24,7 +24,6 @@ class BaseApi(views.MethodView):
 
     def attach_event(self, event_id, required=True):
         event, id = db.get_event(event_id)
-        logger.debug(event_id)
         if required and event is None:
             if id is None:
                 raise f_exc.EventRequired()
@@ -96,7 +95,6 @@ class BaseApi(views.MethodView):
         try:
             result = self.base_resource(**data)
             for attach, value in self.attachments.items():
-                logger.debug(attach)
                 setattr(result, attach, value)
             session.add(result)
             session.commit()
