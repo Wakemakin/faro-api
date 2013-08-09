@@ -2,13 +2,12 @@
 README.rst
 apiconfig.py
 faro_api
-pip-requirements.txt
+requirements
 rakefile
 run.py
 scripts
-service-setup.sh
-service-start.sh
+gunicorn
 setup.cfg
 setup.py
-test-requirements.txt
 tox.ini
+RELEASE

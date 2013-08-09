@@ -2,7 +2,7 @@ import sqlalchemy as sa
 import sqlalchemy.orm as orm
 
 import faro_api.database as db
-import faro_api.utils as utils
+import faro_common.utils as utils
 
 
 class Item(db.model()):
@@ -23,7 +23,7 @@ class Item(db.model()):
         super(Item, self).__init__(**kwargs)
         self.id = unicode(utils.make_uuid())
 
-    __mapper_args = {
+    __mapper_args__ = {
         'polymorphic_identity': 'item',
         'polymorphic_on': type
     }
