@@ -3,7 +3,6 @@ import logging
 import sys
 
 import faro_api.database as db
-import faro_api.middleware.auth.noauth as auth
 import faro_api.utils as utils
 import faro_common.decorators as dec
 import faro_common.flask as flaskutils
@@ -56,10 +55,15 @@ def app(testing=False, create_db=False):
         app.instance.register_blueprint(event_bp.blueprint)
         app.instance.register_blueprint(question_bp.blueprint)
         app.instance.register_blueprint(dps_bp.blueprint)
+        auth_module = app.instance.config['AUTH_STRATEGY']
+        auth_middleware = utils.load_constructor_from_string(auth_module)
+        if auth_middleware is None:
+            logger.fatal("Could not load middleware from %s" % auth_module)
+            exit(1)
 
         try:
             app.instance.config.from_envvar('FARO_SETTINGS')
         except RuntimeError:
             pass
-    app.instance.wsgi_app = auth.NoAuthMiddleware(app.instance.wsgi_app)
+        app.instance.wsgi_app = auth_middleware(app.instance.wsgi_app)
     return app.instance
