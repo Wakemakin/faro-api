@@ -3,7 +3,7 @@ import logging
 import unittest
 
 import faro_api
-from faro_api import utils
+from faro_common import utils as utils
 
 logger = logging.getLogger("faro_api."+__name__)
 
@@ -31,16 +31,26 @@ class DataProviderTest(unittest.TestCase):
                                  'owner_id': username}
                                 ), follow_redirects=True)
 
+    def test_delete_user_with_dataprovider(self):
+        rv = self.create_dataproviders_with_user("provider")
+        rv = self.client.delete('/users/test_user',
+                                follow_redirects=True)
+        self.assertEqual(rv.status_code, 204)
+        rv = self.client.get('/dataproviders')
+        res = json.loads(rv.data)
+        self.assertEqual(rv.status_code, 200)
+        self.assertEqual(res['objects'], [])
+
     def test_get_empty_dataproviders(self):
         rv = self.client.get('/dataproviders')
         res = json.loads(rv.data)
-        assert rv.status_code == 200
-        assert res['objects'] == []
+        self.assertEqual(rv.status_code, 200)
+        self.assertEqual(res['objects'], [])
 
     def test_get_dataproviders_under_user(self):
         self.create_user("john")
         rv = self.client.get('/users/john/dataproviders')
-        assert rv.status_code == 200
+        self.assertEqual(rv.status_code, 200)
 
     def test_post_dataproviders(self):
         self.create_user("john")
@@ -49,20 +59,20 @@ class DataProviderTest(unittest.TestCase):
                                'owner_id': 'john'}
                               ), follow_redirects=True)
         res = json.loads(rv.data)
-        assert rv.status_code == 201
-        assert utils.is_uuid(res['id'])
+        self.assertEqual(rv.status_code, 201)
+        self.assertTrue(utils.is_uuid(res['id']))
 
     def test_put_dataproviders_rename(self):
         rv = self.create_dataproviders_with_user("test provider")
-        assert rv.status_code == 201
+        self.assertEqual(rv.status_code, 201)
         res = json.loads(rv.data)
-        assert res['name'] == 'test provider'
+        self.assertEqual(res['name'], 'test provider')
         id = res['id']
         rv = self.client.put('/dataproviders/' + id, data=json.dumps(
                              {'name': "renamed"}
                              ), follow_redirects=True)
         res = json.loads(rv.data)
-        assert res['name'] == 'renamed'
+        self.assertEqual(res['name'], 'renamed')
 
     def test_delete_dataproviders(self):
         rv = self.create_dataproviders_with_user("test provider")
@@ -70,4 +80,4 @@ class DataProviderTest(unittest.TestCase):
         id = res['id']
         rv = self.client.delete('/dataproviders/'+id,
                                 follow_redirects=True)
-        assert rv.status_code == 204
+        self.assertEqual(rv.status_code, 204)

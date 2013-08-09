@@ -5,18 +5,18 @@ import sqlalchemy.exc
 
 from faro_api.exceptions import common as exc
 from faro_api.models import dataprovider as dps_model
-from faro_api import utils
 from faro_api.views import common
+from faro_common import flask as flaskutils
 
 logger = logging.getLogger('faro_api.'+__name__)
 
 
-class DataProviderOwnerRequired(exc.FaroException):
+class DataProviderOwnerRequired(exc.FaroApiException):
     code = 409
     information = "DataProvider owner required"
 
 
-class DataProviderNameRequired(exc.FaroException):
+class DataProviderNameRequired(exc.FaroApiException):
     code = 409
     information = "DataProvider name required"
 
@@ -53,7 +53,7 @@ class DataProviderApi(common.BaseApi):
         return super(DataProviderApi, self).get(id, with_owner=True)
 
     def put(self, id, userid):
-        data = utils.json_request_data(flask.request.data)
+        data = flaskutils.json_request_data(flask.request.data)
         if not data:
             raise exc.RequiresBody()
         owner_required = 'owner_id' in data
@@ -63,9 +63,9 @@ class DataProviderApi(common.BaseApi):
     def delete(self, id, userid):
         return super(DataProviderApi, self).delete(id)
 
-    @utils.require_body
+    @flaskutils.require_body
     def post(self, userid):
-        data = utils.json_request_data(flask.request.data)
+        data = flaskutils.json_request_data(flask.request.data)
         if not data:
             raise exc.RequiresBody()
         self.attach_owner(userid)

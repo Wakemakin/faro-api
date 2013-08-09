@@ -3,20 +3,21 @@ import logging
 import flask
 import sqlalchemy.exc
 
-from faro_api.exceptions import common as exc
+from faro_api.exceptions import common as f_exc
 from faro_api.models import question as question_model
-from faro_api import utils
 from faro_api.views import common
+from faro_common.exceptions import common as exc
+from faro_common import flask as flaskutils
 
 logger = logging.getLogger('faro_api.'+__name__)
 
 
-class QuestionOwnerRequired(exc.FaroException):
+class QuestionOwnerRequired(f_exc.FaroApiException):
     code = 409
     information = "Question owner required"
 
 
-class QuestionNameRequired(exc.FaroException):
+class QuestionNameRequired(f_exc.FaroApiException):
     code = 409
     information = "Question name required"
 
@@ -65,7 +66,7 @@ class QuestionApi(common.BaseApi):
         self.blueprint = mod
 
     def put(self, id):
-        data = utils.json_request_data(flask.request.data)
+        data = flaskutils.json_request_data(flask.request.data)
         if not data:
             raise exc.RequiresBody()
         owner_required = 'owner_id' in data
@@ -77,9 +78,9 @@ class QuestionApi(common.BaseApi):
         self.add_event_filter(eventid)
         return super(QuestionApi, self).get(id)
 
-    @utils.require_body
+    @flaskutils.require_body
     def post(self, userid, eventid):
-        data = utils.json_request_data(flask.request.data)
+        data = flaskutils.json_request_data(flask.request.data)
         if not data:
             raise exc.RequiresBody()
 
