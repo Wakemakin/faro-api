@@ -11,7 +11,8 @@ logger = logging.getLogger("faro_api."+__name__)
 class QuestionTest(unittest.TestCase):
 
     def setUp(self):
-        self.app = faro_api.app(testing=True)
+        auth = "faro_api.middleware.auth.authtest.TestAdminAuth"
+        self.app = faro_api.app(testing=True, auth_strategy=auth)
         self.client = self.app.test_client()
 
     def tearDown(self):
