@@ -8,8 +8,6 @@ class Role(db.model()):
     id = sa.Column(sa.Unicode(36), primary_key=True)
     name = sa.Column(sa.Unicode(32), unique=True, nullable=False)
     
-    users = orm.relationship('users',backref='roles', secondary = users_roles)
-    
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
         self.id = unicode(utils.make_uuid())

@@ -48,7 +48,8 @@ def create_db_environment(app):
     from faro_api.models import item
     from faro_api.models import question
     from faro_api.models import user
-    [user, event, item, question, action, dataprovider]
+    from faro_api.models import role
+    [user, event, item, question, action, dataprovider, role]
     model().metadata.create_all(bind=engine)
 
     return db_session
