@@ -10,7 +10,8 @@ logger = logging.getLogger('faro_api.'+__name__)
 class PageTest(unittest.TestCase):
 
     def setUp(self):
-        self.app = faro_api.app(testing=True)
+        auth = "faro_api.middleware.auth.authtest.TestAdminAuth"
+        self.app = faro_api.app(testing=True, auth_strategy=auth)
         self.client = self.app.test_client()
         self.page_size = self.app.config['DEFAULT_PAGE_SIZE']
         self.small_page_size = 5
