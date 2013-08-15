@@ -12,6 +12,7 @@ class Config(object):
     DATABASE_CONNECT_OPTIONS = {}
     DEFAULT_PAGE_SIZE = 15
     MAXIMUM_PAGE_SIZE = 100
+    AUTH_STRATEGY = 'faro_api.middleware.auth.noauth.NoAuthMiddleware'
 
     """PAGINATION CONSTANTS"""
     PAGE_QUERY = 'p'

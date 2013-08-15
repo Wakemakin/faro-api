@@ -13,3 +13,8 @@ class EventRequired(exc.FaroException):
 class OwnerRequired(exc.FaroException):
     code = 409
     information = "Owner required"
+
+
+class AuthenticationRequired(exc.FaroException):
+    code = 403
+    information = "Authentication required"
