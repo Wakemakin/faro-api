@@ -46,5 +46,4 @@ class DevelopmentConfig(Config):
 
 class TestConfig(Config):
     DEBUG = True
-    AUTH_STRATEGY = 'faro_api.middleware.auth.authtest.TestAdminAuth'
     TESTING = True
