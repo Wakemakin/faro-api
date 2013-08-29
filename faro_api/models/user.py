@@ -18,6 +18,10 @@ class User(db.model()):
         self.username = kwargs['username'].lower()
 
     @staticmethod
+    def has_owner(self):
+        return False
+
+    @staticmethod
     def read_only_columns():
         return ['username']
 

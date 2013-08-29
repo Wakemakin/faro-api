@@ -37,7 +37,7 @@ class EventTest(unittest.TestCase):
         res = json.loads(rv.data)
         logger.debug(rv.data)
         self.assertTrue(res['objects'] == [])
-        self.assertTrue(rv.status_code == 200)
+        self.assertEqual(rv.status_code, 200)
 
     def test_get_one_event(self):
         rv = self.create_event_with_user("test")
@@ -75,7 +75,7 @@ class EventTest(unittest.TestCase):
         self.assertTrue(res['name'] == 'test')
         self.assertTrue(res['id'] is not None)
         self.assertTrue(utils.is_uuid(res['id']))
-        self.assertTrue(rv.status_code == 201)
+        self.assertEqual(rv.status_code, 201)
 
     def test_post_event(self):
         rv = self.create_user('test_user')
@@ -89,7 +89,7 @@ class EventTest(unittest.TestCase):
         self.assertTrue(res['name'] == 'test')
         self.assertTrue(res['id'] is not None)
         self.assertTrue(utils.is_uuid(res['id']))
-        self.assertTrue(rv.status_code == 201)
+        self.assertEqual(rv.status_code, 201)
 
     def test_post_event_with_id(self):
         """Should this test fail?"""
@@ -101,7 +101,7 @@ class EventTest(unittest.TestCase):
                                'owner_id': 'test_user'}
                               ), follow_redirects=True)
         logger.debug(rv.data)
-        self.assertTrue(rv.status_code == 201)
+        self.assertEqual(rv.status_code, 201)
 
     def test_put_event_with_name(self):
         rv = self.create_event_with_user('test_event')
@@ -114,7 +114,7 @@ class EventTest(unittest.TestCase):
         res = json.loads(rv.data)
         logger.debug(rv.data)
         self.assertTrue(res['name'] == 'test')
-        self.assertTrue(rv.status_code == 200)
+        self.assertEqual(rv.status_code, 200)
 
     def test_put_event_with_description(self):
         rv = self.create_event_with_user('test_event')
@@ -127,7 +127,7 @@ class EventTest(unittest.TestCase):
         res = json.loads(rv.data)
         logger.debug(rv.data)
         self.assertTrue(res['description'] == 'test')
-        self.assertTrue(rv.status_code == 200)
+        self.assertEqual(rv.status_code, 200)
 
     def test_filter_event_by_owner(self):
         rv = self.create_event_with_user("test", "derp")
@@ -136,12 +136,12 @@ class EventTest(unittest.TestCase):
         res = json.loads(rv.data)
         logger.debug(rv.data)
         self.assertTrue(len(res['objects']) == 2)
-        self.assertTrue(rv.status_code == 200)
+        self.assertEqual(rv.status_code, 200)
         rv = self.client.get('/events?owner_id=derp')
         res = json.loads(rv.data)
         logger.debug(rv.data)
         self.assertTrue(len(res['objects']) == 1)
-        self.assertTrue(rv.status_code == 200)
+        self.assertEqual(rv.status_code, 200)
 
     def test_filter_event_by_name(self):
         rv = self.create_event_with_user("test", "asdf")
@@ -150,12 +150,12 @@ class EventTest(unittest.TestCase):
         res = json.loads(rv.data)
         logger.debug(rv.data)
         self.assertTrue(len(res['objects']) == 2)
-        self.assertTrue(rv.status_code == 200)
+        self.assertEqual(rv.status_code, 200)
         rv = self.client.get('/events?name=derp')
         res = json.loads(rv.data)
         logger.debug(rv.data)
         self.assertTrue(len(res['objects']) == 1)
-        self.assertTrue(rv.status_code == 200)
+        self.assertEqual(rv.status_code, 200)
 
     def test_delete_event(self):
         rv = self.create_event_with_user("test")
@@ -163,20 +163,20 @@ class EventTest(unittest.TestCase):
         id = res['id']
         rv = self.client.delete('/events/'+id, follow_redirects=True)
         logger.debug(rv.data)
-        self.assertTrue(rv.status_code == 204)
+        self.assertEqual(rv.status_code, 204)
 
     def test_error_get_one_event_by_fail_id(self):
         id = str(utils.make_uuid())
         rv = self.client.get('/events/'+id)
         logger.debug(rv.data)
-        self.assertTrue(rv.status_code == 404)
+        self.assertEqual(rv.status_code, 404)
 
     def test_error_post_event_empty_body(self):
         rv = self.client.post('/events', data=json.dumps(
                               {}
                               ), follow_redirects=True)
         logger.debug(rv.data)
-        self.assertTrue(rv.status_code == 400)
+        self.assertEqual(rv.status_code, 400)
 
     def test_error_put_empty_body(self):
         rv = self.create_event_with_user("test")
@@ -186,7 +186,7 @@ class EventTest(unittest.TestCase):
                              {}
                              ), follow_redirects=True)
         logger.debug(rv.data)
-        self.assertTrue(rv.status_code == 400)
+        self.assertEqual(rv.status_code, 400)
 
     def test_error_post_event_no_name(self):
         rv = self.create_user('test_user')
@@ -195,7 +195,7 @@ class EventTest(unittest.TestCase):
                                'owner_id': 'test_user'}
                               ), follow_redirects=True)
         logger.debug(rv.data)
-        self.assertTrue(rv.status_code == 409)
+        self.assertEqual(rv.status_code, 409)
 
     def test_error_post_event_with_made_event(self):
         rv = self.create_user('test_user')
@@ -206,7 +206,7 @@ class EventTest(unittest.TestCase):
                                'owner_id': 'test_user'}
                               ), follow_redirects=True)
         logger.debug(rv.data)
-        self.assertTrue(rv.status_code == 405)
+        self.assertEqual(rv.status_code, 405)
 
     def test_error_post_event_no_user(self):
         rv = self.create_user('test_user')
@@ -215,7 +215,7 @@ class EventTest(unittest.TestCase):
                                'description': 'derp'}
                               ), follow_redirects=True)
         logger.debug(rv.data)
-        self.assertTrue(rv.status_code == 409)
+        self.assertEqual(rv.status_code, 409)
 
     def test_error_put_event_with_id(self):
         rv = self.create_event_with_user("test")
@@ -224,10 +224,10 @@ class EventTest(unittest.TestCase):
                              {'id': 'test'}
                              ), follow_redirects=True)
         logger.debug(rv.data)
-        self.assertTrue(rv.status_code == 403)
+        self.assertEqual(rv.status_code, 403)
 
     def test_error_delete_fail_event(self):
         id = str(utils.make_uuid())
         rv = self.client.delete('/events/'+id)
         logger.debug(rv.data)
-        self.assertTrue(rv.status_code == 404)
+        self.assertEqual(rv.status_code, 404)
