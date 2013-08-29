@@ -4,6 +4,7 @@ import uuid
 
 import faro_api.database as db
 import faro_api.exceptions.common as exc
+import faro_common.exceptions.common as cexc
 
 
 def generate_temp_database():
@@ -58,6 +59,12 @@ def require_admin(fn):
     return wrapped
 
 
+def check_context_for_admin(context):
+    if 'is_admin' in context and context['is_admin']:
+        return True
+    return False
+
+
 def check_admin_or_owner(resource_owner):
     if not validate_auth_basics():
         raise exc.AuthenticationRequired()
@@ -73,8 +80,11 @@ def check_owner(resource_owner):
     if not validate_auth_basics():
         raise exc.AuthenticationRequired()
     context = get_auth_context()
+    if check_context_for_admin(context):
+        return
     if resource_owner is None:
         raise exc.AuthenticationRequired()
-    user = db.get_owner(resource_owner)
+    user, id = db.get_owner(resource_owner)
     if not context['userid'] == user.id:
-        raise exc.AuthenticationRequired()
+        if not check_context_for_admin(context):
+            raise cexc.NotFound()

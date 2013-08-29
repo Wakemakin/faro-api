@@ -46,9 +46,9 @@ class QuestionTest(unittest.TestCase):
         uri = "/users/%s/questions" % user_id
         rv = self.client.post(uri, data=json.dumps(
                               {'name': 'test'}), follow_redirects=True)
-        self.assertTrue(rv.status_code == 201)
+        self.assertEqual(rv.status_code, 201)
         rv = self.client.delete("/users/john", follow_redirects=True)
-        self.assertTrue(rv.status_code == 204)
+        self.assertEqual(rv.status_code, 204)
 
     def test_postget_question_under_user(self):
         rv = self.create_user("john")
@@ -59,7 +59,7 @@ class QuestionTest(unittest.TestCase):
                               {'name': 'test'}), follow_redirects=True)
         res = json.loads(rv.data)
         logger.debug(rv.data)
-        self.assertTrue(rv.status_code == 201)
+        self.assertEqual(rv.status_code, 201)
         self.assertTrue(res['name'] == 'test')
         self.assertTrue(res['id'] is not None)
         self.assertTrue(utils.is_uuid(res['id']))
@@ -79,7 +79,7 @@ class QuestionTest(unittest.TestCase):
                               follow_redirects=True)
         res = json.loads(rv.data)
         logger.debug(rv.data)
-        self.assertTrue(rv.status_code == 201)
+        self.assertEqual(rv.status_code, 201)
         self.assertTrue(res['name'] == 'test')
         self.assertTrue(res['id'] is not None)
         self.assertTrue(utils.is_uuid(res['id']))
@@ -99,7 +99,7 @@ class QuestionTest(unittest.TestCase):
                               ), follow_redirects=True)
         res = json.loads(rv.data)
         logger.debug(rv.data)
-        self.assertTrue(rv.status_code == 201)
+        self.assertEqual(rv.status_code, 201)
         self.assertTrue(res['name'] == 'test')
         self.assertTrue(res['id'] is not None)
         self.assertTrue(utils.is_uuid(res['id']))
@@ -117,7 +117,7 @@ class QuestionTest(unittest.TestCase):
                               {'name': 'test'}), follow_redirects=True)
         res = json.loads(rv.data)
         logger.debug(rv.data)
-        self.assertTrue(rv.status_code == 201)
+        self.assertEqual(rv.status_code, 201)
 
     def test_move_question_between_users(self):
         rv = self.create_user("john")
@@ -132,13 +132,13 @@ class QuestionTest(unittest.TestCase):
         res = json.loads(rv.data)
         logger.debug(rv.data)
         self.assertTrue(res['owner_id'] == user_id)
-        self.assertTrue(rv.status_code == 200)
+        self.assertEqual(rv.status_code, 200)
 
     def test_get_empty_questions(self):
         rv = self.client.get('/questions')
         res = json.loads(rv.data)
         self.assertTrue(res['objects'] == [])
-        self.assertTrue(rv.status_code == 200)
+        self.assertEqual(rv.status_code, 200)
 
     def test_get_one_question(self):
         rv = self.create_question_with_user("test")
@@ -170,7 +170,7 @@ class QuestionTest(unittest.TestCase):
                               ), follow_redirects=True)
         res = json.loads(rv.data)
         logger.debug(rv.data)
-        self.assertTrue(rv.status_code == 201)
+        self.assertEqual(rv.status_code, 201)
         self.assertTrue(res['name'] == 'test')
         self.assertTrue(res['id'] is not None)
         self.assertTrue(utils.is_uuid(res['id']))
@@ -186,7 +186,7 @@ class QuestionTest(unittest.TestCase):
         self.assertTrue(res['name'] == 'test')
         self.assertTrue(res['id'] is not None)
         self.assertTrue(utils.is_uuid(res['id']))
-        self.assertTrue(rv.status_code == 201)
+        self.assertEqual(rv.status_code, 201)
 
     def test_post_question_with_id(self):
         """Should this test fail?"""
@@ -199,7 +199,7 @@ class QuestionTest(unittest.TestCase):
                               ), follow_redirects=True)
         res = json.loads(rv.data)
         self.assertTrue(res['id'] != 'test-id')
-        self.assertTrue(rv.status_code == 201)
+        self.assertEqual(rv.status_code, 201)
 
     def test_put_question_with_name(self):
         rv = self.create_question_with_user('test_question')
@@ -211,7 +211,7 @@ class QuestionTest(unittest.TestCase):
                              ), follow_redirects=True)
         res = json.loads(rv.data)
         self.assertTrue(res['name'] == 'test')
-        self.assertTrue(rv.status_code == 200)
+        self.assertEqual(rv.status_code, 200)
 
     def test_filter_question_by_owner(self):
         rv = self.create_question_with_user("test", "derp")
@@ -219,11 +219,11 @@ class QuestionTest(unittest.TestCase):
         rv = self.client.get('/questions')
         res = json.loads(rv.data)
         self.assertTrue(len(res['objects']) == 2)
-        self.assertTrue(rv.status_code == 200)
+        self.assertEqual(rv.status_code, 200)
         rv = self.client.get('/questions?owner_id=derp')
         res = json.loads(rv.data)
         self.assertTrue(len(res['objects']) == 1)
-        self.assertTrue(rv.status_code == 200)
+        self.assertEqual(rv.status_code, 200)
 
     def test_put_question_with_description(self):
         rv = self.create_question_with_user('test_question')
@@ -235,7 +235,7 @@ class QuestionTest(unittest.TestCase):
                              ), follow_redirects=True)
         res = json.loads(rv.data)
         self.assertTrue(res['description'] == 'test')
-        self.assertTrue(rv.status_code == 200)
+        self.assertEqual(rv.status_code, 200)
 
     def test_filter_question_by_name(self):
         rv = self.create_question_with_user("test", "asdf")
@@ -243,41 +243,41 @@ class QuestionTest(unittest.TestCase):
         rv = self.client.get('/questions')
         res = json.loads(rv.data)
         self.assertTrue(len(res['objects']) == 2)
-        self.assertTrue(rv.status_code == 200)
+        self.assertEqual(rv.status_code, 200)
         rv = self.client.get('/questions?name=derp')
         res = json.loads(rv.data)
         self.assertTrue(len(res['objects']) == 1)
-        self.assertTrue(rv.status_code == 200)
+        self.assertEqual(rv.status_code, 200)
 
     def test_delete_question(self):
         rv = self.create_question_with_user("test")
         res = json.loads(rv.data)
         id = res['id']
         rv = self.client.delete('/questions/'+id, follow_redirects=True)
-        self.assertTrue(rv.status_code == 204)
+        self.assertEqual(rv.status_code, 204)
 
     def test_error_get_question_by_fail_user(self):
         id = str(utils.make_uuid())
         rv = self.client.get('/users/'+id+'/questions')
-        self.assertTrue(rv.status_code == 404)
+        self.assertEqual(rv.status_code, 404)
 
     def test_error_get_one_question_by_fail_id(self):
         id = str(utils.make_uuid())
         rv = self.client.get('/questions/'+id)
-        self.assertTrue(rv.status_code == 404)
+        self.assertEqual(rv.status_code, 404)
 
     def test_error_post_question_empty_body(self):
         rv = self.client.post('/questions', data=json.dumps(
                               {}
                               ), follow_redirects=True)
-        self.assertTrue(rv.status_code == 400)
+        self.assertEqual(rv.status_code, 400)
 
     def test_error_post_question_no_user(self):
         rv = self.create_user('test_user')
         rv = self.client.post('/questions', data=json.dumps(
                               {'description': 'herps and derps'}),
                               follow_redirects=True)
-        self.assertTrue(rv.status_code == 409)
+        self.assertEqual(rv.status_code, 409)
 
     def test_error_post_question_fail_event(self):
         id = str(utils.make_uuid())
@@ -287,7 +287,7 @@ class QuestionTest(unittest.TestCase):
                               {'description': 'herps and derps',
                                'owner_id': 'test_user'}
                               ), follow_redirects=True)
-        self.assertTrue(rv.status_code == 404)
+        self.assertEqual(rv.status_code, 404)
 
     def test_error_post_question_fail_user(self):
         id = str(utils.make_uuid())
@@ -295,7 +295,7 @@ class QuestionTest(unittest.TestCase):
         rv = self.client.post(uri, data=json.dumps(
                               {'description': 'herps and derps'}),
                               follow_redirects=True)
-        self.assertTrue(rv.status_code == 404)
+        self.assertEqual(rv.status_code, 404)
 
     def test_error_post_question_no_name(self):
         rv = self.create_user('test_user')
@@ -303,7 +303,7 @@ class QuestionTest(unittest.TestCase):
                               {'description': 'herps and derps',
                                'owner_id': 'test_user'}
                               ), follow_redirects=True)
-        self.assertTrue(rv.status_code == 409)
+        self.assertEqual(rv.status_code, 409)
 
     def test_error_post_question_with_made_question(self):
         rv = self.create_user('test_user')
@@ -313,7 +313,7 @@ class QuestionTest(unittest.TestCase):
                               {'name': 'test',
                                'owner_id': 'test_user'}
                               ), follow_redirects=True)
-        self.assertTrue(rv.status_code == 405)
+        self.assertEqual(rv.status_code, 405)
 
     def test_error_put_question_with_id(self):
         rv = self.create_question_with_user("test")
@@ -321,16 +321,16 @@ class QuestionTest(unittest.TestCase):
         rv = self.client.put('/questions/'+id, data=json.dumps(
                              {'id': 'test'}
                              ), follow_redirects=True)
-        self.assertTrue(rv.status_code == 403)
+        self.assertEqual(rv.status_code, 403)
 
     def test_error_put_question_with_no_body(self):
         rv = self.create_question_with_user("test")
         id = json.loads(rv.data)['id']
         rv = self.client.put('/questions/'+id, data=json.dumps(
                              {}), follow_redirects=True)
-        self.assertTrue(rv.status_code == 400)
+        self.assertEqual(rv.status_code, 400)
 
     def test_error_delete_fail_question(self):
         id = str(utils.make_uuid())
         rv = self.client.delete('/questions/'+id)
-        self.assertTrue(rv.status_code == 404)
+        self.assertEqual(rv.status_code, 404)
