@@ -41,16 +41,16 @@ def app(testing=False, create_db=False, auth_strategy=None):
         def before_request():
             flask.g.session = session
 
-        from faro_api.views import dataproviders
-        from faro_api.views import endpoint
-        from faro_api.views import events
-        from faro_api.views import questions
-        from faro_api.views import users
+        import faro_api.views.dataproviders as dp
+        import faro_api.views.endpoint as endpoint
+        import faro_api.views.events as events
+        import faro_api.views.questions as questions
+        import faro_api.views.users as users
         app.instance.register_blueprint(endpoint.mod)
         user_bp = users.UserApi()
         event_bp = events.EventApi()
         question_bp = questions.QuestionApi()
-        dps_bp = dataproviders.DataProviderApi()
+        dps_bp = dp.DataProviderApi()
         app.instance.register_blueprint(user_bp.blueprint)
         app.instance.register_blueprint(event_bp.blueprint)
         app.instance.register_blueprint(question_bp.blueprint)
