@@ -1,4 +1,5 @@
 import sqlalchemy as sa
+import sqlalchemy.orm as orm
 
 import faro_api.database as db
 import faro_common.utils as utils
@@ -11,11 +12,17 @@ class User(db.model()):
     first_name = sa.Column(sa.Unicode(32))
     last_name = sa.Column(sa.Unicode(32))
 
+    roles = orm.relationship('roles',backref='users', secondary = users_roles)
+
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
         self.id = unicode(utils.make_uuid())
         self.display_name = kwargs['username']
         self.username = kwargs['username'].lower()
+
+    @staticmethod
+    def has_owner(self):
+        return False
 
     @staticmethod
     def read_only_columns():

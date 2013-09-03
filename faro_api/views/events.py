@@ -3,8 +3,10 @@ import logging
 import flask
 import sqlalchemy.exc
 
+import faro_api.database as db
 from faro_api.exceptions import common as f_exc
 from faro_api.models import event as event_model
+import faro_api.utils as utils
 from faro_api.views import common
 from faro_common.exceptions import common as exc
 from faro_common import flask as flaskutils
@@ -48,6 +50,7 @@ class EventApi(common.BaseApi):
         self.blueprint = mod
 
     def get(self, id, userid):
+        utils.check_owner(userid)
         self.add_owner_filter(userid)
         return super(EventApi, self).get(id, with_owner=True)
 
@@ -55,6 +58,10 @@ class EventApi(common.BaseApi):
         data = flaskutils.json_request_data(flask.request.data)
         if not data:
             raise exc.RequiresBody()
+        event, id = db.get_event(id)
+        if event is None:
+            raise exc.NotFound()
+        utils.check_owner(event.owner_id)
         owner_required = 'owner_id' in data
         self.attach_owner(userid, required=owner_required)
         return super(EventApi, self).put(id, with_owner=True)
@@ -64,6 +71,7 @@ class EventApi(common.BaseApi):
 
     @flaskutils.require_body
     def post(self, userid):
+        utils.check_owner(userid)
         data = flaskutils.json_request_data(flask.request.data)
         if not data:
             raise exc.RequiresBody()

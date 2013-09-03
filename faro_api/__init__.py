@@ -3,7 +3,6 @@ import logging
 import sys
 
 import faro_api.database as db
-import faro_api.middleware.auth.noauth as auth
 import faro_api.utils as utils
 import faro_common.decorators as dec
 import faro_common.flask as flaskutils
@@ -23,7 +22,7 @@ logger.addHandler(ch)
 
 
 @dec.static_var("instance", None)
-def app(testing=False, create_db=False):
+def app(testing=False, create_db=False, auth_strategy=None):
     if testing or app.instance is None:
         app.instance = flaskutils.make_json_app(MyFlask(__name__))
         config = 'apiconfig.DevelopmentConfig'
@@ -42,24 +41,31 @@ def app(testing=False, create_db=False):
         def before_request():
             flask.g.session = session
 
-        from faro_api.views import dataproviders
-        from faro_api.views import endpoint
-        from faro_api.views import events
-        from faro_api.views import questions
-        from faro_api.views import users
+        import faro_api.views.dataproviders as dp
+        import faro_api.views.endpoint as endpoint
+        import faro_api.views.events as events
+        import faro_api.views.questions as questions
+        import faro_api.views.users as users
         app.instance.register_blueprint(endpoint.mod)
         user_bp = users.UserApi()
         event_bp = events.EventApi()
         question_bp = questions.QuestionApi()
-        dps_bp = dataproviders.DataProviderApi()
+        dps_bp = dp.DataProviderApi()
         app.instance.register_blueprint(user_bp.blueprint)
         app.instance.register_blueprint(event_bp.blueprint)
         app.instance.register_blueprint(question_bp.blueprint)
         app.instance.register_blueprint(dps_bp.blueprint)
+        auth_module = app.instance.config['AUTH_STRATEGY']
+        if auth_strategy is not None:
+            auth_module = auth_strategy
+        auth_middleware = utils.load_constructor_from_string(auth_module)
+        if auth_middleware is None:
+            logger.fatal("Could not load middleware from %s" % auth_module)
+            exit(1)
 
         try:
             app.instance.config.from_envvar('FARO_SETTINGS')
         except RuntimeError:
             pass
-    app.instance.wsgi_app = auth.NoAuthMiddleware(app.instance.wsgi_app)
+        app.instance.wsgi_app = auth_middleware(app.instance.wsgi_app)
     return app.instance
