@@ -19,22 +19,30 @@ class RoleApi(common.BaseApi):
     def _configure_endpoint(self):
         mod = flask.Blueprint('roles', __name__)
         role_view = self.as_view('role_api')
-        """
-        mod.add_url_rule('/users',
-                         defaults={'id': None, 'eventid': None},
-                         view_func=user_view, methods=['GET', 'OPTIONS'])
-        mod.add_url_rule('/users',
-                         view_func=user_view, methods=['POST', 'OPTIONS'])
-        mod.add_url_rule('/users/<id>', view_func=user_view,
-                         defaults={'eventid': None},
-                         methods=['GET', 'OPTIONS'])
-        mod.add_url_rule('/users/<id>', view_func=user_view,
-                         methods=['DELETE', 'PUT', 'OPTIONS'])
-        mod.add_url_rule('/events/<string:eventid>/owner',
-                         defaults={'id': None},
-                         methods=['GET', 'OPTIONS'], view_func=user_view)
-        self.blueprint = mod
-        """
+        #GET
+        mod.add_url_rule('/users/<string:userId>/roles', 
+                         view_func=role_view, 
+                         defaults={'userId' : None,'roleId' : None},
+                         methods=['GET','OPTIONS'])
+        mod.add_url_rule('/roles', 
+                         view_func=role_view,
+                         methods=['GET','OPTIONS'])
+        mod.add_url_rule('/roles/<userId>', 
+                         view_func=role_view,
+                         methods=['GET','OPTIONS'])
+        #POST
+        mod.add_url_rule('/roles', 
+                         view_func=role_view,
+                         methods=['POST','OPTIONS'])
+        #PUT
+        mod.add_url_rule('/roles/<userId>', 
+                         view_func=role_view,
+                         defaults={'userId' : None},
+                         methods=['PUT','OPTIONS'])
+        mod.add_url_rule('/users/<string:userId>/roles', 
+                         view_func=role_view, 
+                         defaults={'userId' : None},
+                         methods=['DELETE','OPTIONS'])
     def get(self, id, eventid, **kwargs):
         user_id = id
         event = self.attach_event(eventid, required=False)
