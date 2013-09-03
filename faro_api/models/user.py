@@ -1,9 +1,16 @@
 import sqlalchemy as sa
 import sqlalchemy.orm as orm
+import sqlalchemy.ext.declarative as decl
 
 import faro_api.database as db
 import faro_common.utils as utils
 
+saBase = decl.declarative_base()
+
+users_roles = sa.Table('user_roles', db.model().metadata,
+    sa.Column('fk_user', sa.Unicode(36), sa.ForeignKey('users.id')),
+    sa.Column('fk_role', sa.Unicode(36), sa.ForeignKey('roles.id'))
+)
 
 class User(db.model()):
     id = sa.Column(sa.Unicode(36), primary_key=True)
@@ -12,7 +19,7 @@ class User(db.model()):
     first_name = sa.Column(sa.Unicode(32))
     last_name = sa.Column(sa.Unicode(32))
 
-    roles = orm.relationship('roles',backref='users', secondary = users_roles)
+    roles = orm.relationship('Role', backref='users', secondary=users_roles)
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
