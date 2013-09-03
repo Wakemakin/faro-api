@@ -74,6 +74,9 @@ class Base(object):
 
     date_created = sa.Column(sa.DateTime, default=sa.func.now())
 
+    def has_owner(self):
+        return True
+
     def update(self, **kwargs):
         for key, value in kwargs.iteritems():
             if key in self._read_only_base or\
