@@ -42,6 +42,7 @@ class DataProviderApi(common.BaseApi):
                          defaults={'userid': None},
                          view_func=dps_view, methods=['POST', 'OPTIONS'])
         mod.add_url_rule('/dataproviders/<id>', view_func=dps_view,
+                         defaults={'userid': None},
                          methods=['GET', 'OPTIONS'])
         mod.add_url_rule('/dataproviders/<id>', view_func=dps_view,
                          defaults={'userid': None},
