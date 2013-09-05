@@ -1,15 +1,15 @@
 import sqlalchemy as sa
-import sqlalchemy.orm as orm
 
 import faro_api.database as db
 import faro_common.utils as utils
 
+
 class Role(db.model()):
     id = sa.Column(sa.Unicode(36), primary_key=True)
     name = sa.Column(sa.Unicode(32), unique=True, nullable=False)
-    
+
     def __init__(self, **kwargs):
-        super(User, self).__init__(**kwargs)
+        super(Role, self).__init__(**kwargs)
         self.id = unicode(utils.make_uuid())
         self.name = kwargs['name'].lower()
 

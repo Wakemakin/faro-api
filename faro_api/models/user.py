@@ -7,10 +7,10 @@ import faro_common.utils as utils
 
 saBase = decl.declarative_base()
 
-users_roles = sa.Table('user_roles', db.model().metadata,
-    sa.Column('fk_user', sa.Unicode(36), sa.ForeignKey('users.id')),
-    sa.Column('fk_role', sa.Unicode(36), sa.ForeignKey('roles.id'))
-)
+fk_user = sa.Column('fk_user', sa.Unicode(36), sa.ForeignKey('users.id'))
+fk_role = sa.Column('fk_role', sa.Unicode(36), sa.ForeignKey('roles.id'))
+users_roles = sa.Table('user_roles', db.model().metadata, fk_user, fk_role)
+
 
 class User(db.model()):
     id = sa.Column(sa.Unicode(36), primary_key=True)
