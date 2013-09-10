@@ -1,3 +1,4 @@
+import json
 import logging
 import unittest
 
@@ -21,3 +22,10 @@ class LoginTokenTest(unittest.TestCase):
     def test_get_tokens(self):
         rv = self.client.get('/tokens')
         self.assertEquals(405, rv.status_code)
+
+    def test_post_token_valid(self):
+        rv = self.client.post('/tokens', data=json.dumps(
+                              {'username': 'valid', 'password': 'password'}),
+                              follow_redirects=True)
+        self.assertTrue(False)
+        self.assertEquals(201, rv.status_code)
