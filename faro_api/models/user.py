@@ -1,11 +1,8 @@
 import sqlalchemy as sa
 import sqlalchemy.orm as orm
-import sqlalchemy.ext.declarative as decl
 
 import faro_api.database as db
 import faro_common.utils as utils
-
-saBase = decl.declarative_base()
 
 fk_user = sa.Column('fk_user', sa.Unicode(36), sa.ForeignKey('users.id'))
 fk_role = sa.Column('fk_role', sa.Unicode(36), sa.ForeignKey('roles.id'))

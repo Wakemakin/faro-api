@@ -48,6 +48,14 @@ class OwnershipAuthTest(unittest.TestCase):
         res = json.loads(rv.data)
         return res
 
+    def _create_event_under_owner2(self):
+        id = self.user1['id']
+        uri = '/users/%s/events' % id
+        rv = self.client.post(uri, data=json.dumps({'name': 'test'}),
+                              follow_redirects=True, headers=self.headers2)
+        res = json.loads(rv.data)
+        return res
+
     def test_create_event_under_owner_user(self):
         id = self.user1['id']
         uri = '/users/%s/events' % id
@@ -60,6 +68,35 @@ class OwnershipAuthTest(unittest.TestCase):
         self.assertTrue(res['name'] == 'test')
         self.assertTrue(res['id'] is not None)
         self.assertTrue(utils.is_uuid(res['id']))
+
+    def test_get_event_under_owner_user(self):
+        self._create_event_under_owner1()
+        uri = '/events'
+        rv = self.client.get(uri, follow_redirects=True,
+                             headers=self.headers1)
+        res = json.loads(rv.data)
+        self.assertEqual(200, rv.status_code)
+        self.assertEqual(1, len(res['objects']))
+        rv = self.client.get(uri, follow_redirects=True,
+                             headers=self.headers2)
+        res = json.loads(rv.data)
+        self.assertEqual(200, rv.status_code)
+        self.assertEqual(0, len(res['objects']))
+
+    def test_get_event_under_owner_user_with_other_stuff(self):
+        self._create_event_under_owner1()
+        self._create_event_under_owner2()
+        uri = '/events'
+        rv = self.client.get(uri, follow_redirects=True,
+                             headers=self.headers1)
+        res = json.loads(rv.data)
+        self.assertEqual(200, rv.status_code)
+        self.assertEqual(1, len(res['objects']))
+        rv = self.client.get(uri, follow_redirects=True,
+                             headers=self.headers2)
+        res = json.loads(rv.data)
+        self.assertEqual(200, rv.status_code)
+        self.assertEqual(1, len(res['objects']))
 
     def test_create_event_under_wrong_user(self):
         id = self.user1['id']
@@ -94,6 +131,13 @@ class OwnershipAuthTest(unittest.TestCase):
         id = self.user1['id']
         uri = '/users/%s/events' % id
         rv = self.client.get(uri, headers=self.headers2)
+        self.assertEqual(rv.status_code, 404)
+
+    def test_delete_an_event_under_wrong_user(self):
+        self._create_event_under_owner1()
+        id = self.user1['id']
+        uri = '/users/%s/events' % id
+        rv = self.client.delete(uri, headers=self.headers2)
         self.assertEqual(rv.status_code, 404)
 
     def test_put_an_event_under_owner_user(self):

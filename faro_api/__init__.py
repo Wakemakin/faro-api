@@ -46,15 +46,18 @@ def app(testing=False, create_db=False, auth_strategy=None):
         import faro_api.views.events as events
         import faro_api.views.questions as questions
         import faro_api.views.users as users
+        import faro_api.views.tokens as tokens
         app.instance.register_blueprint(endpoint.mod)
         user_bp = users.UserApi()
         event_bp = events.EventApi()
         question_bp = questions.QuestionApi()
         dps_bp = dp.DataProviderApi()
+        token_bp = tokens.TokenApi()
         app.instance.register_blueprint(user_bp.blueprint)
         app.instance.register_blueprint(event_bp.blueprint)
         app.instance.register_blueprint(question_bp.blueprint)
         app.instance.register_blueprint(dps_bp.blueprint)
+        app.instance.register_blueprint(token_bp.blueprint)
         auth_module = app.instance.config['AUTH_STRATEGY']
         if auth_strategy is not None:
             auth_module = auth_strategy

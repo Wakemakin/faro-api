@@ -1,10 +1,13 @@
 import datetime
 import flask
+import logging
 import uuid
 
 import faro_api.database as db
 import faro_api.exceptions.common as exc
 import faro_common.exceptions.common as cexc
+
+logger = logging.getLogger('faro_api.' + __name__)
 
 
 def generate_temp_database():
@@ -59,10 +62,21 @@ def require_admin(fn):
     return wrapped
 
 
+def is_admin():
+    return check_context_for_admin(get_auth_context())
+
+
 def check_context_for_admin(context):
     if 'is_admin' in context and context['is_admin']:
         return True
     return False
+
+
+def get_userid_from_context():
+    context = get_auth_context()
+    if not context or 'userid' not in context:
+        return None
+    return unicode(context['userid'])
 
 
 def check_admin_or_owner(resource_owner):
@@ -83,6 +97,9 @@ def check_owner(resource_owner):
     if check_context_for_admin(context):
         return
     if resource_owner is None:
+        if flask.request.method == 'GET':
+            """This allows GET on /resource because there is no ownerid"""
+            return
         raise exc.AuthenticationRequired()
     user, id = db.get_owner(resource_owner)
     if not context['userid'] == user.id:

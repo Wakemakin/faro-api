@@ -67,6 +67,7 @@ class EventApi(common.BaseApi):
         return super(EventApi, self).put(id, with_owner=True)
 
     def delete(self, id, userid):
+        utils.check_owner(userid)
         return super(EventApi, self).delete(id)
 
     @flaskutils.require_body

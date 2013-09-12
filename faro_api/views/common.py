@@ -7,6 +7,7 @@ import sqlalchemy.orm.exc as sa_exc
 
 from faro_api import database as db
 from faro_api.exceptions import common as f_exc
+from faro_api import utils as utils
 from faro_common.exceptions import common as exc
 from faro_common import flask as flaskutils
 import faro_common.flask.sautils as sautils
@@ -20,7 +21,13 @@ class BaseApi(views.MethodView):
         self.alternate_key = None
         self._configure_endpoint()
         self.additional_filters = {}
+        self.ignore_data = []
         self.attachments = {}
+
+    def sanitize_data_dict(self, d):
+        for ignore in self.ignore_data:
+            if ignore in d:
+                d.pop(ignore)
 
     def attach_event(self, event_id, required=True):
         event, id = db.get_event(event_id)
@@ -52,6 +59,9 @@ class BaseApi(views.MethodView):
             self.additional_filters['event_id'] = event.id
 
     def add_owner_filter(self, owner_id):
+        if owner_id is None and not utils.is_admin():
+            logger.debug("Trying to get user information from context")
+            owner_id = utils.get_userid_from_context()
         user, id = db.get_owner(owner_id)
         if user is not None:
             self.additional_filters['owner_id'] = user.id
@@ -92,6 +102,7 @@ class BaseApi(views.MethodView):
         data = flaskutils.json_request_data(flask.request.data)
         if not data:
             raise exc.RequiresBody()
+        self.sanitize_data_dict(data)
         try:
             result = self.base_resource(**data)
             for attach, value in self.attachments.items():
@@ -111,6 +122,7 @@ class BaseApi(views.MethodView):
         data = flaskutils.json_request_data(flask.request.data)
         if not data:
             raise exc.RequiresBody()
+        self.sanitize_data_dict(data)
         try:
             result = sautils.get_one(session, self.base_resource, id,
                                      self.alternate_key)
