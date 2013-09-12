@@ -50,7 +50,6 @@ class DataProviderApi(common.BaseApi):
         self.blueprint = mod
 
     def get(self, id, userid, **kwargs):
-        self.add_owner_filter(userid)
         return super(DataProviderApi, self).get(id, with_owner=True)
 
     def put(self, id, userid):
